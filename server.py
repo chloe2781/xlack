@@ -18,7 +18,6 @@ tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
 
-#
 # The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
 #
 # XXX: The URI should be in the format of: 
@@ -36,15 +35,13 @@ DATABASE_HOST = "34.148.107.47" # change to 34.28.53.86 if you used database 2 f
 DATABASEURI = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWRD}@{DATABASE_HOST}/project1"
 
 
-#
+
 # This line creates a database engine that knows how to connect to the URI above.
-#
 engine = create_engine(DATABASEURI)
 
-#
+
 # Example of running queries in your database
 # Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
-#
 with engine.connect() as conn:
 	create_table_command = """
 	CREATE TABLE IF NOT EXISTS test (
@@ -115,10 +112,9 @@ def index():
 	# DEBUG: this is debugging code to see what request looks like
 	print(request.args)
 
-
-	#
+	
 	# example of a database query
-	#
+
 	select_query = "SELECT name from test"
 	cursor = g.conn.execute(text(select_query))
 	names = []
