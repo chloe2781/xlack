@@ -5,8 +5,16 @@
 </head>
 
 <body>
-    <h1>This is workspace!</h1>
-    <div>{{data}}</div>
+    <div class="ws-container">
+        <div>
+            {% for n in data %}
+            <form method="POST" action="/chooseWS">
+                <input type="hidden" name="workspace_name" value="{{ workspace }}">
+                <button type="submit">{{ n }}</button>
+            </form>
+            {% endfor %}
+        </div>
     </div>
+</body>
 
 </html>

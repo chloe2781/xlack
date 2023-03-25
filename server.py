@@ -174,7 +174,16 @@ def signup(email):
 
 @app.route('/workspace/<user_id>')
 def workspace(user_id):
-	context = dict(data = user_id)
+	select_query = text("""
+		SELECT name FROM \"workspace\" 
+		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
+						WHERE user_id = :user_id)""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	workspaces = []
+	for result in cursor:
+		workspaces.append(result[0])
+	cursor.close()
+	context = dict(data = workspaces)
 
 	return render_template("workspace.html", **context)
 
