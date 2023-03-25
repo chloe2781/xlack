@@ -1,0 +1,26 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="login-container signup-container">
+        <h2>You're new user!</h2>
+        <h3>Let's get you set up</h3>
+        <div>
+            <form method="POST" action="/submit">
+                <input type="email" name="user_email" value="{{email}}" required>
+                <input type="text" name="user_name" placeholder="Enter your name:" required>
+                <input type="date" name="dob" placeholder="Date of birth:" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+
+</html>

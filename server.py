@@ -12,7 +12,8 @@ import os
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, url_for
+from datetime import datetime
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -115,12 +116,14 @@ def index():
 	
 	# example of a database query
 
-	select_query = "SELECT name from test"
-	cursor = g.conn.execute(text(select_query))
-	names = []
-	for result in cursor:
-		names.append(result[0])
-	cursor.close()
+	# select_query = "SELECT name from test"
+	# cursor = g.conn.execute(text(select_query))
+	# names = []
+	# for result in cursor:
+	# 	names.append(result[0])
+	# cursor.close()
+
+
 
 	#
 	# Flask uses Jinja templates, which is an extension to HTML where you can
@@ -148,14 +151,14 @@ def index():
 	#     <div>{{n}}</div>
 	#     {% endfor %}
 	#
-	context = dict(data = names)
+	# context = dict(data = emails)
 
 
 	#
 	# render_template looks in the templates/ folder for files.
 	# for example, the below file reads template/index.html
 	#
-	return render_template("index.html", **context)
+	return render_template("index.html")
 
 #
 # This is an example of a different path.  You can see it at:
@@ -165,23 +168,99 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
-@app.route('/another')
-def another():
-	return render_template("another.html")
+@app.route('/signup/<email>')
+def signup(email):
+	return render_template("signup.html", email=email)
+
+@app.route('/workspace/<user_id>')
+def workspace(user_id):
+	context = dict(data = user_id)
+
+	return render_template("workspace.html", **context)
 
 
 # Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-	# accessing form inputs from user
-	name = request.form['name']
+# @app.route('/add', methods=['POST'])
+# def add():
+# 	# accessing form inputs from user
+# 	name = request.form['name']
 	
-	# passing params in for each variable into query
+# 	# passing params in for each variable into query
+# 	params = {}
+# 	params["new_name"] = name
+# 	g.conn.execute(text('INSERT INTO test(name) VALUES (:new_name)'), params)
+# 	g.conn.commit()
+# 	return redirect('/')
+
+@app.route('/next', methods=['POST'])
+def next():
+	# accessing form inputs from user
+	curr_email = request.form['email']
+
+	# checking if email already exists
+	# select_query = "SELECT email from \"user\""
+	# cursor = g.conn.execute(text(select_query))
+	# emails = []
+	# for result in cursor:
+	# 	emails.append(result[0])
+	# cursor.close()
+
+	# # if email already exists, redirect to user's workspace
+	# if email in emails:
+	# 	select_query = """SELECT user_id from \"user\"
+	# 					WHERE email = :email"""
+	# 	cursor = g.conn.execute(select_query, email)
+	# 	curr_user_id = [cursor.fetchone()[0]]
+	# 	cursor.close()
+	# 	return redirect(url_for('workspace', user_id = curr_user_id))
+	
+	# Query the database to find the user_id corresponding to the email
+	select_query = text("""SELECT user_id FROM "user" WHERE email = :email""")
+	result = g.conn.execute(select_query, {"email": curr_email}).fetchone()
+    
+	if result is None:
+		return redirect(url_for('signup', email=curr_email))
+    
+	user_id = result[0]
+	return redirect(url_for('workspace', user_id=user_id))
+
+	# if email does not exist, redirect to signup page
+	
+	# params = {}
+	# params["new_name"] = name
+	# g.conn.execute(text('INSERT INTO test(name) VALUES (:new_name)'), params)
+	# g.conn.commit()
+	
+@app.route('/submit', methods=['POST'])
+def submit():
+	# accessing form inputs from user
+	email = request.form['user_email']
+	name = request.form['user_name']
+	dob_str = request.form['dob']
+	dob = datetime.strptime(dob_str, '%Y-%m-%d')
+	dob = str(dob.date())
+
+	# Query the database to find the most recent user_id
+	select_query = text("""SELECT MAX(CAST(user_id AS INTEGER)) FROM \"user\"""")
+	result = g.conn.execute(select_query).fetchone()
+	prev_user_id = result[0]
+
+	# insert new user into database
 	params = {}
-	params["new_name"] = name
-	g.conn.execute(text('INSERT INTO test(name) VALUES (:new_name)'), params)
+	params["user_id"] = str(int(prev_user_id) + 1)
+	params["email"] = email
+	params["name"] = name
+	params["dob"] = dob
+	g.conn.execute(text('INSERT INTO "user"(user_id, email, name, dob) VALUES (:user_id, :email, :name, :dob)'), params)
 	g.conn.commit()
-	return redirect('/')
+
+	# Query the database to find the user_id corresponding to the email
+	select_query = text("""SELECT user_id FROM "user" WHERE email = :email""")
+	result = g.conn.execute(select_query, {"email": email}).fetchone()
+
+	user_id = result[0]
+
+	return redirect(url_for('workspace', user_id=user_id))
 
 
 @app.route('/login')
