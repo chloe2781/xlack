@@ -278,6 +278,59 @@ def login():
 	this_is_never_executed()
 
 
+@app.route('/addWSButton/<user_id>', methods=['POST'])
+def addWSButton(user_id):
+	user_id = request.form['user_id']
+	return render_template("add_workspace.html", user_id=user_id)
+
+#@app.route('/addChannelButton', methods=['POST'])
+#def addChannelButton():
+#	return render_template("add_channel.html")
+
+@app.route('/addWS/<user_id>', methods=['POST'])
+def addWS(user_id):
+	# accessing form inputs from user
+	name = request.form['ws_name']
+	user_id = request.form['user_id']
+
+	# Query the database to find the most recent ws_id
+	select_query = text("""SELECT ws_id FROM \"workspace\"""")
+	id_list = g.conn.execute(select_query).fetchall()
+
+	max_tail = 0
+	max_head = ''
+	for id in id_list:
+		s = id[0]
+		head = s.rstrip('0123456789')
+		tail = int(s[len(head):])
+		if tail > max_tail:
+			max_tail = tail
+			max_head= head
+
+	#USER ID DOES NOT WORK --> need to find diff way to do it
+
+	# insert new workspace into database
+	params = {}
+	params["ws_id"] = head + str(int(tail) + 1)
+	params["name"] = name
+	params["user_id"] = user_id
+	g.conn.execute(text('INSERT INTO "workspace"(ws_id, name, user_id) VALUES (:ws_id, :name, :user_id)'), params)
+
+	#also need to have user join that workspace
+	g.conn.execute(text('INSERT INTO "join"(user_id,ws_id) VALUES (:user_id,:ws_id)'), params)
+
+	g.conn.commit()
+
+	# Query the database to find the user_id corresponding to the email
+	#select_query = text("""SELECT user_id FROM "user" WHERE email = :email""")
+	#result = g.conn.execute(select_query, {"email": email}).fetchone()
+
+	#user_id = result[0]
+
+	return redirect(url_for('workspace', user_id=user_id))
+
+
+
 if __name__ == "__main__":
 	import click
 

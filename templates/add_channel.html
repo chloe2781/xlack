@@ -1,0 +1,23 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="add-channel-container">
+        <h2>Create a channel</h2>
+        <div>
+            <form method="POST" action="/addChannel">
+                <input type="text" name="channel_name" placeholder="New channel name:" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
