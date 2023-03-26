@@ -194,6 +194,20 @@ def workspace(user_id):
 	return render_template("workspace.html", **context)
 
 
+@app.route('/channel/<workspace_id>')
+def channel(workspace_id):
+	select_query = text("""
+		SELECT name FROM \"channel\" 
+		WHERE ws_id = workspace_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": workspace_id})
+	channels = []
+	for result in cursor:
+		channels.append(result[0])
+	cursor.close()
+	context = dict(data = channels)
+
+	return render_template("channel.html", **context)
+
 # Example of adding new data to the database
 # @app.route('/add', methods=['POST'])
 # def add():
@@ -284,13 +298,29 @@ def login():
 	this_is_never_executed()
 
 
+@app.route('/chooseWS', methods=['POST'])
+def chooseWS():
+	workspace_name = request.form['workspace_name']
+	print("\nHEEEEEEEEERE \n", workspace_name )
+
+	# Query the database to find the ws_id corresponding to the workspace anem
+	select_query = text("""SELECT ws_id FROM "workspace" WHERE name = :workspace_name""")
+	result = g.conn.execute(select_query, {"name": workspace_name}).fetchone()
+
+	#ws_id = result[0]
+
+	return redirect(url_for('channel', workspace_id=ws_id))
+
+
+
+
 @app.route('/addWSButton', methods=['POST'])
 def addWSButton():
 	return render_template("add_workspace.html")
 
-#@app.route('/addChannelButton', methods=['POST'])
-#def addChannelButton():
-#	return render_template("add_channel.html")
+@app.route('/addChannelButton', methods=['POST'])
+def addChannelButton():
+	return render_template("add_channel.html")
 
 @app.route('/addWS', methods=['POST'])
 def addWS():

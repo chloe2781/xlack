@@ -1,1 +1,24 @@
->:(
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+    <div class="channel-container">
+        <div>
+            {% for n in data %}
+            <form method="POST" action="/chooseChannel">
+                <input type="hidden" name="channel_name" value="{{ channel }}">
+                <button type="submit">{{ n }}</button>
+            </form>
+            {% endfor %}
+        </div>
+        <div>
+            <form method="POST" action="/addChannelButton">
+                <button type="submit">Add Channel</button>
+        </div>
+    </div>
+</body>
+
+</html>
