@@ -12,11 +12,14 @@ import os
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, url_for
+from flask import Flask, request, render_template, g, redirect, Response, url_for, session
 from datetime import datetime
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
+
+#added to use sessions
+app.secret_key = 'mysecretkey'
 
 
 # The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
@@ -174,6 +177,9 @@ def signup(email):
 
 @app.route('/workspace/<user_id>')
 def workspace(user_id):
+	#added to try to save user_id for other pages
+	session['user_id'] = user_id
+
 	select_query = text("""
 		SELECT name FROM \"workspace\" 
 		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
@@ -278,20 +284,19 @@ def login():
 	this_is_never_executed()
 
 
-@app.route('/addWSButton/<user_id>', methods=['POST'])
-def addWSButton(user_id):
-	user_id = request.form['user_id']
-	return render_template("add_workspace.html", user_id=user_id)
+@app.route('/addWSButton', methods=['POST'])
+def addWSButton():
+	return render_template("add_workspace.html")
 
 #@app.route('/addChannelButton', methods=['POST'])
 #def addChannelButton():
 #	return render_template("add_channel.html")
 
-@app.route('/addWS/<user_id>', methods=['POST'])
-def addWS(user_id):
+@app.route('/addWS', methods=['POST'])
+def addWS():
 	# accessing form inputs from user
 	name = request.form['ws_name']
-	user_id = request.form['user_id']
+	user_id = session.get('user_id')
 
 	# Query the database to find the most recent ws_id
 	select_query = text("""SELECT ws_id FROM \"workspace\"""")
