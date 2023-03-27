@@ -144,7 +144,7 @@ body {
     position: fixed;
     top: 80px;
     left: 350px;
-    height: 65%;
+    height: 68%;
     width: 100%;
     background-color: #FFFFFF;
     z-index: 1;
@@ -152,6 +152,7 @@ body {
     padding: 30px;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+    scroll-behavior: auto !important;
 }
 
 .chat-username .chat-message {
@@ -171,27 +172,36 @@ body {
     bottom: 0;
     left: 350px;
     height: 15%;
-    width: 100%;
-    background-color: #D9D9D9;
+    width: 74%;
+    background-color: #FFFFFF;
     z-index: 1;
-    padding: 30px;
+    margin: 20px;
 }
 
-.chat-footer input {
-    width: 60%;
+.chat-footer textarea {
+    width: 90%;
     height: 100%;
     border: none;
-    background-color: #FFFFFF;
-    padding-left: 15px;
+    background-color: #D9D9D9;
+    padding: 25px;
     margin-bottom: 20px;
+    resize: none;
+    font-size: 18px;
 }
 
 .chat-footer button {
-    display: block;
-    margin: 30px auto 0;
-    width: 150px;
-    height: 50px;
+    position: absolute;
+    width: 100px;
+    height: 40px;
     border: none;
-    background-color: #D9D9D9;
-    font-size: 25px;
+    background-color: #919191;
+    font-size: 20px;
+    color: #FFFFFF;
+    margin: 20px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.chat-footer button:hover {
+    background-color: #AEAEAE;
 }

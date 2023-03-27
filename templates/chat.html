@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
 </head>
 
-<body>
+<body onload="scrollToBottom()">
     <div class="ws-container">
         <div>
             {% for n in workspaces %}
@@ -45,21 +45,28 @@
         <div class="chat-header">
             <h4># {{ channel_name }}</h4>
         </div>
-        <div class="chat-body">
+        <div class="chat-body" id="chatBody">
             {% for n in messages %}
             <div class="chat-username"><b>{{ n[2] }}</b></div>
             <div class="chat-message">{{ n[1] }}</div>
             {% endfor %}
         </div>
+        <script>
+            function scrollToBottom() {
+                var chatBody = document.getElementById("chatBody");
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        </script>
         <div class="chat-footer">
             <form method="POST" action="/sendMessage">
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
                 <input type="hidden" name="channel_id" value="{{ channel_id }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <input type="text" name="message">
-                <button type="submit">Send</button>
+                <textarea name="message" rows="4" cols="50" placeholder="Message #{{channel_name}}"></textarea>
+                <button type="submit">SEND</button>
             </form>
         </div>
+    </div>
 </body>
 
 </html>

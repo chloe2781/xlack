@@ -419,7 +419,29 @@ def addWS():
 
 	return redirect(url_for('workspace', user_id=user_id))
 
+@app.route('/sendMessage', methods=['POST'])
+def sendMessage():
+	# accessing form inputs from user
+	message = request.form['message']
+	user_id = session.get('user_id')
+	ws_id = request.form['ws_id']
+	channel_id = request.form['channel_id']
 
+	# Query the database to find the most recent message_id
+	select_query = text("""SELECT MAX(CAST(message_id AS INTEGER)) FROM \"message\"""")
+	result = g.conn.execute(select_query).fetchone()
+	prev_message_id = result[0]
+
+	# insert new message into database
+	params = {}
+	params["message_id"] = str(int(prev_message_id) + 1)
+	params["message"] = message
+	params["user_id"] = user_id
+	params["channel_id"] = channel_id
+	g.conn.execute(text('INSERT INTO "message"(message_id, message, user_id, channel_id) VALUES (:message_id, :message, :user_id, :channel_id)'), params)
+	g.conn.commit()
+
+	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
 if __name__ == "__main__":
 	import click
