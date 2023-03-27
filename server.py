@@ -181,33 +181,45 @@ def workspace(user_id):
 	session['user_id'] = user_id
 
 	select_query = text("""
-		SELECT name FROM \"workspace\" 
+		SELECT ws_id, name FROM \"workspace\" 
+		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
+						WHERE user_id = :user_id)""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+
+	workspaces = []
+	for result in cursor:
+		workspaces.append(result)
+	cursor.close()
+	return render_template("workspace.html", data=workspaces, user_id=user_id)
+
+@app.route('/channel/<user_id>/<ws_id>')
+def channel(user_id, ws_id):
+	# query to get all workspaces that the user is a part of
+	select_query = text("""
+		SELECT ws_id, name FROM \"workspace\" 
 		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
 						WHERE user_id = :user_id)""")
 	cursor = g.conn.execute(select_query, {"user_id": user_id})
 	workspaces = []
 	for result in cursor:
-		workspaces.append(result[0])
+		workspaces.append(result)
 	cursor.close()
-	context = dict(data = workspaces)
 
-	return render_template("workspace.html", **context)
-
-
-@app.route('/channel/<workspace_id>')
-def channel(workspace_id):
+	# query to get all channels in the workspace
 	select_query = text("""
-		SELECT name FROM \"channel\" 
-		WHERE ws_id = workspace_id""")
-	cursor = g.conn.execute(select_query, {"ws_id": workspace_id})
+		SELECT channel_id, name FROM \"channel\" 
+		WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
 	channels = []
 	for result in cursor:
-		channels.append(result[0])
+		channels.append(result)
 	cursor.close()
-	context = dict(data = channels)
 
-	return render_template("channel.html", **context)
+	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id)
 
+@app.route('/chat/<user_id>/<ws_id>/<channel_id>')
+def chat(user_id, ws_id, channel_id):
+	return render_template("chat.html", user_id=user_id, ws_id=ws_id, channel_id=channel_id)
 # Example of adding new data to the database
 # @app.route('/add', methods=['POST'])
 # def add():
@@ -300,19 +312,18 @@ def login():
 
 @app.route('/chooseWS', methods=['POST'])
 def chooseWS():
-	workspace_name = request.form['workspace_name']
-	print("\nHEEEEEEEEERE \n", workspace_name )
+	ws_id = request.form['workspace_id']
+	user_id = session.get('user_id')
 
-	# Query the database to find the ws_id corresponding to the workspace anem
-	select_query = text("""SELECT ws_id FROM "workspace" WHERE name = :workspace_name""")
-	result = g.conn.execute(select_query, {"name": workspace_name}).fetchone()
+	return redirect(url_for('channel',user_id=user_id, ws_id=ws_id))
 
-	#ws_id = result[0]
+@app.route('/chooseChannel', methods=['POST'])
+def chooseChannel():
+	channel_id = request.form['channel_id']
+	user_id = session.get('user_id')
+	ws_id = request.form['ws_id']
 
-	return redirect(url_for('channel', workspace_id=ws_id))
-
-
-
+	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
 @app.route('/addWSButton', methods=['POST'])
 def addWSButton():

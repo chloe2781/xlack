@@ -5,19 +5,41 @@
 </head>
 
 <body>
-    <div class="channel-container">
+    <div class="ws-container">
         <div>
-            {% for n in data %}
+            {% for n in workspaces %}
+            <form method="POST" action="/chooseWS">
+                <input type="hidden" name="workspace_name" value="{{ n[1] }}">
+                <input type="hidden" name="workspace_id" value="{{ n[0] }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit">{{ n[1] }}</button>
+            </form>
+            {% endfor %}
+        </div>
+        <div>
+            <form method="POST" action="/addWSButton">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit">+ Add Workspace</button>
+            </form>
+        </div>
+    </div>
+    <div class="channel-container">
+        <h4>Channels</h4>
+        <div>
+            {% for n in channels %}
             <form method="POST" action="/chooseChannel">
-                <input type="hidden" name="channel_name" value="{{ channel }}">
-                <button type="submit">{{ n }}</button>
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="channel_id" value="{{ n[0] }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit"># {{ n[1] }}</button>
             </form>
             {% endfor %}
         </div>
         <div>
             <form method="POST" action="/addChannelButton">
-                <button type="submit">Add Channel</button>
+                <button type="submit">+ Add Channel</button>
         </div>
+        <h4>Direct Messages</h4>
     </div>
 </body>
 

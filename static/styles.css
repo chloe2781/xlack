@@ -76,3 +76,45 @@ body {
     font-size: 20px;
     color: #000;
 }
+
+.ws-container button:hover {
+    background-color: #C3C3C3;
+}
+
+.channel-container {
+    position: fixed;
+    top: 0;
+    left: 150px;
+    height: 100%;
+    width: 200px;
+    background-color: #C3C3C3;
+    z-index: 1;
+    padding-top: 20px;
+}
+
+.channel-container button {
+    display: block;
+    margin-bottom: -10px;
+    margin-top: -10px;
+    margin-left: 20px;
+    width: 80%;
+    height: 30px;
+    border: none;
+    background-color: #C3C3C3;
+    font-size: 16px;
+    color: #000;
+    text-align: left;
+}
+
+.channel-container button:hover {
+    background-color: #AEAEAE;
+}
+
+.channel-container h4 {
+    font-size: 20px;
+    font-family: arial;
+    color: #000000;
+    margin-top: 30px;
+    margin-left: 20px;
+    margin-bottom: 23px;
+}

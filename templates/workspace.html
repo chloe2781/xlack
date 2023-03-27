@@ -9,14 +9,18 @@
         <div>
             {% for n in data %}
             <form method="POST" action="/chooseWS">
-                <input type="hidden" name="workspace_name" value="{{ workspace }}">
-                <button type="submit">{{ n }}</button>
-            </form>
+                <input type="hidden" name="workspace_name" value="{{ n[1] }}">
+                <input type="hidden" name="workspace_id" value="{{ n[0] }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit">{{ n[1] }}</button>
+            </form>3
             {% endfor %}
         </div>
         <div>
             <form method="POST" action="/addWSButton">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">Add Workspace</button>
+            </form>
         </div>
     </div>
 </body>
