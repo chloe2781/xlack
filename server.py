@@ -428,17 +428,20 @@ def sendMessage():
 	channel_id = request.form['channel_id']
 
 	# Query the database to find the most recent message_id
-	select_query = text("""SELECT MAX(CAST(message_id AS INTEGER)) FROM \"message\"""")
+	select_query = text("""SELECT MAX(CAST(SUBSTRING(mess_id, 2) AS INTEGER)) FROM \"message\"""")
 	result = g.conn.execute(select_query).fetchone()
 	prev_message_id = result[0]
 
 	# insert new message into database
 	params = {}
-	params["message_id"] = str(int(prev_message_id) + 1)
+	params["mess_id"] = "m" + str(int(prev_message_id) + 1)
 	params["message"] = message
 	params["user_id"] = user_id
 	params["channel_id"] = channel_id
-	g.conn.execute(text('INSERT INTO "message"(message_id, message, user_id, channel_id) VALUES (:message_id, :message, :user_id, :channel_id)'), params)
+	params["ws_id"] = ws_id
+	g.conn.execute(text('INSERT INTO "message"(mess_id, post_date, content, user_id) VALUES (:mess_id,CURRENT_TIMESTAMP, :message, :user_id)'), params)
+	g.conn.execute(text('INSERT INTO "is_posted_in_channel"(mess_id, channel_id, ws_id, user_id) VALUES (:mess_id,:channel_id, :ws_id, :user_id)'), params)
+	
 	g.conn.commit()
 
 	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
