@@ -386,6 +386,14 @@ def chooseChannel():
 
 	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
+@app.route('/chooseDM', methods=['POST'])
+def chooseDM():
+	dm_id = request.form['dm_id']
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+
+	return redirect(url_for('dm',user_id=user_id, ws_id=ws_id, dm_id=dm_id))
+
 @app.route('/addWSButton', methods=['POST'])
 def addWSButton():
 	user_id = request.form['user_id']
