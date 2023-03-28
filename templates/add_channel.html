@@ -11,6 +11,8 @@
         <h2>Create a channel</h2>
         <div>
             <form method="POST" action="/addChannel">
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
                 <input type="text" name="channel_name" placeholder="New channel name:" required>
                 <button type="submit">Submit</button>
             </form>

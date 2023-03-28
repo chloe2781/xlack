@@ -13,13 +13,13 @@
                 <input type="hidden" name="workspace_id" value="{{ n[0] }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">{{ n[1] }}</button>
-            </form>3
+            </form>
             {% endfor %}
         </div>
         <div>
             <form method="POST" action="/addWSButton">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit">Add Workspace</button>
+                <button type="submit">+ Add Workspace</button>
             </form>
         </div>
     </div>

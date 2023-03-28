@@ -9,17 +9,18 @@ A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
 import os
+import time
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, url_for, session
+from flask import Flask, request, render_template, g, redirect, Response, url_for
 from datetime import datetime
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
 #added to use sessions
-app.secret_key = 'mysecretkey'
+#app.secret_key = 'mysecretkey'
 
 
 # The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
@@ -177,9 +178,7 @@ def signup(email):
 
 @app.route('/workspace/<user_id>')
 def workspace(user_id):
-	#added to try to save user_id for other pages
-	session['user_id'] = user_id
-
+	# query to get all workspaces that the user is a part of
 	select_query = text("""
 		SELECT ws_id, name FROM \"workspace\" 
 		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
@@ -357,36 +356,50 @@ def login():
 @app.route('/chooseWS', methods=['POST'])
 def chooseWS():
 	ws_id = request.form['workspace_id']
-	user_id = session.get('user_id')
+	user_id = request.form['user_id']
 
 	return redirect(url_for('channel',user_id=user_id, ws_id=ws_id))
 
 @app.route('/chooseChannel', methods=['POST'])
 def chooseChannel():
 	channel_id = request.form['channel_id']
-	user_id = session.get('user_id')
+	user_id = request.form['user_id']
 	ws_id = request.form['ws_id']
 
 	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
 @app.route('/addWSButton', methods=['POST'])
 def addWSButton():
-	return render_template("add_workspace.html")
+	user_id = request.form['user_id']
+
+	# 1 second delay to deal with concurrency issues
+	time.sleep(1)
+
+	return render_template("add_workspace.html", user_id=user_id)
+
 
 @app.route('/addChannelButton', methods=['POST'])
 def addChannelButton():
-	return render_template("add_channel.html")
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
 
+	# 1 second delay to deal with concurrency issues
+	time.sleep(1)
+
+	return render_template("add_channel.html", ws_id=ws_id, user_id=user_id)
+
+#assumes we handle GET and POST when we don't explicitly define methods
 @app.route('/addWS', methods=['POST'])
 def addWS():
 	# accessing form inputs from user
 	name = request.form['ws_name']
-	user_id = session.get('user_id')
+	user_id = request.form['user_id']
 
 	# Query the database to find the most recent ws_id
 	select_query = text("""SELECT ws_id FROM \"workspace\"""")
 	id_list = g.conn.execute(select_query).fetchall()
 
+	#strip ws_id because formated as "w#", where # is some number
 	max_tail = 0
 	max_head = ''
 	for id in id_list:
@@ -395,13 +408,11 @@ def addWS():
 		tail = int(s[len(head):])
 		if tail > max_tail:
 			max_tail = tail
-			max_head= head
-
-	#USER ID DOES NOT WORK --> need to find diff way to do it
+			max_head = head
 
 	# insert new workspace into database
 	params = {}
-	params["ws_id"] = head + str(int(tail) + 1)
+	params["ws_id"] = max_head + str(int(max_tail) + 1)
 	params["name"] = name
 	params["user_id"] = user_id
 	g.conn.execute(text('INSERT INTO "workspace"(ws_id, name, user_id) VALUES (:ws_id, :name, :user_id)'), params)
@@ -411,19 +422,59 @@ def addWS():
 
 	g.conn.commit()
 
-	# Query the database to find the user_id corresponding to the email
-	#select_query = text("""SELECT user_id FROM "user" WHERE email = :email""")
-	#result = g.conn.execute(select_query, {"email": email}).fetchone()
-
-	#user_id = result[0]
-
 	return redirect(url_for('workspace', user_id=user_id))
+
+@app.route('/addChannel', methods=['POST'])
+def addChannel():
+	# accessing form inputs from user
+	name = request.form['channel_name']
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
+
+	# Query the database to find the most recent channel_id given a ws
+	select_query = text("""SELECT channel_id FROM "channel" WHERE ws_id = :ws_id""")
+	id_list = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()
+
+	#strip ws_id because formated as "c$-#",
+	# where $ is some number for ws-id, and # is some number for the channel id in that ws
+	ws_head = ws_id.rstrip('0123456789')
+	ws_id_num = ws_id[len(ws_head):]
+
+	#if return none, create the first channel in that ws
+	if len(id_list) == 0:
+		result = "c" + ws_id_num + "-1"
+	else:
+		max_tail = 0
+		max_head = ''
+		for id in id_list:
+			s = id[0]
+			head, tail = s.split('-')
+			if int(tail) > max_tail:
+				max_tail = int(tail)
+				max_head = head
+		#max_head includes "w#" need to add "-"
+		result = max_head + "-" + str(int(max_tail) + 1)
+
+	# insert new channel into database
+	params = {}
+	params["ws_id"] = ws_id
+	params["channel_id"] = result
+	params["name"] = name
+	params["user_id"] = user_id
+	g.conn.execute(text('INSERT INTO "channel"(ws_id, channel_id, name, user_id) VALUES (:ws_id, :channel_id, :name, :user_id)'), params)
+
+	g.conn.commit()
+
+	#redirect to channel
+	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
+
+
 
 @app.route('/sendMessage', methods=['POST'])
 def sendMessage():
 	# accessing form inputs from user
 	message = request.form['message']
-	user_id = session.get('user_id')
+	user_id = request.form['user_id']
 	ws_id = request.form['ws_id']
 	channel_id = request.form['channel_id']
 

@@ -37,6 +37,8 @@
         </div>
         <div>
             <form method="POST" action="/addChannelButton">
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">+ Add Channel</button>
         </div>
         <h4>Direct Messages</h4>
