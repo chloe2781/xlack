@@ -214,7 +214,25 @@ def channel(user_id, ws_id):
 		channels.append(result)
 	cursor.close()
 
-	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id)
+	#query to get all the direct messages in the workspace
+
+	#select_query = text("""
+	#		SELECT dm_id FROM \"direct_message\"
+	#		WHERE ws_id = :ws_id""")
+
+	#only display dms that have messages sent --> no empty ones
+	select_query = text("""
+			SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+			WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
+	#query to get the users in
+
+	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id, dms=dms)
 
 @app.route('/chat/<user_id>/<ws_id>/<channel_id>')
 def chat(user_id, ws_id, channel_id):
