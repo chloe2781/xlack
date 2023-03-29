@@ -527,8 +527,8 @@ def addDMButton():
 	#list through all people in the workspace
 
 	# Query the database to find the most recent ws_id
-	select_query = text("""SELECT user_id FROM \"join\"
-						WHERE ws_id = :ws_id""")
+	select_query = text("""SELECT J.user_id, name FROM \"join\" J, \"user\" U
+						WHERE ws_id = :ws_id AND J.user_id = U.user_id""")
 	ws_users = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()
 
 	# 1 second delay to deal with concurrency issues
@@ -616,6 +616,50 @@ def addChannel():
 	#redirect to channel
 	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
+
+@app.route('/addDM', methods=['POST'])
+def addDM():
+	# accessing form inputs from user
+	name = request.form['dm_name']
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
+
+	# Query the database to find the most recent channel_id given a ws
+	select_query = text("""SELECT channel_id FROM "channel" WHERE ws_id = :ws_id""")
+	id_list = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()
+
+	#strip ws_id because formated as "c$-#",
+	# where $ is some number for ws-id, and # is some number for the channel id in that ws
+	ws_head = ws_id.rstrip('0123456789')
+	ws_id_num = ws_id[len(ws_head):]
+
+	#if return none, create the first channel in that ws
+	if len(id_list) == 0:
+		result = "c" + ws_id_num + "-1"
+	else:
+		max_tail = 0
+		max_head = ''
+		for id in id_list:
+			s = id[0]
+			head, tail = s.split('-')
+			if int(tail) > max_tail:
+				max_tail = int(tail)
+				max_head = head
+		#max_head includes "w#" need to add "-"
+		result = max_head + "-" + str(int(max_tail) + 1)
+
+	# insert new channel into database
+	params = {}
+	params["ws_id"] = ws_id
+	params["channel_id"] = result
+	params["name"] = name
+	params["user_id"] = user_id
+	g.conn.execute(text('INSERT INTO "channel"(ws_id, channel_id, name, user_id) VALUES (:ws_id, :channel_id, :name, :user_id)'), params)
+
+	g.conn.commit()
+
+	#redirect to channel
+	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
 
 @app.route('/sendMessage', methods=['POST'])

@@ -8,14 +8,15 @@
 <body>
 
     <div class="login-container">
-        <h2>Create a channel</h2>
+        <h2>Create a DM</h2>
+        <h3>Click on the user you want to DM</h3>
         <div>
-            <p>Click on the user you want to DM and write your message</p>
             {% for n in ws_users %}
             <form method="POST" action="/addDM">
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit"># {{ n[0] }}</button>
+                <input type="hidden" name="recipient_id" value="{{ n[0] }}">
+                <button type="submit">{{ n[1] }}</button>
             </form>
             {% endfor %}
         </div>
