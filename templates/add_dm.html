@@ -1,0 +1,27 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h2>Create a channel</h2>
+        <div>
+            <p>Click on the user you want to DM and write your message</p>
+            {% for n in ws_users %}
+            <form method="POST" action="/addDM">
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit"># {{ n[0] }}</button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+
+
+</html>

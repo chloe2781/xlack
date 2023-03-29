@@ -214,13 +214,8 @@ def channel(user_id, ws_id):
 		channels.append(result)
 	cursor.close()
 
-	#query to get all the direct messages in the workspace
-
-	#select_query = text("""
-	#		SELECT dm_id FROM \"direct_message\"
-	#		WHERE ws_id = :ws_id""")
-
-	#only display dms that have messages sent --> no empty ones
+	# query to get all the direct messages in the workspace
+	# only display dms that have messages sent --> no empty ones
 	select_query = text("""
 			SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
 			WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
@@ -230,9 +225,16 @@ def channel(user_id, ws_id):
 		dms.append(result)
 	cursor.close()
 
-	#query to get the users in
+	#query to get workspace name
+	select_query = text("""
+			SELECT name FROM \"workspace\" 
+			WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
 
-	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id, dms=dms)
+	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id,
+						   dms=dms, ws_name=ws_name)
 
 @app.route('/chat/<user_id>/<ws_id>/<channel_id>')
 def chat(user_id, ws_id, channel_id):
@@ -257,6 +259,17 @@ def chat(user_id, ws_id, channel_id):
 		channels.append(result)
 	cursor.close()
 
+	# query to get all the direct messages in the workspace
+	# only display dms that have messages sent --> no empty ones
+	select_query = text("""
+				SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
 	# query to get all messages in the channel
 	select_query = text("""
 		SELECT M.mess_id, M.content, U.name
@@ -279,8 +292,100 @@ def chat(user_id, ws_id, channel_id):
 	channel_name = cursor.fetchone()[0]
 	cursor.close()
 
-	return render_template("chat.html",workspaces=workspaces, channels=channels, user_id=user_id, 
-			ws_id=ws_id, channel_id=channel_id, messages=messages, channel_name=channel_name)
+	# query to get workspace name
+	select_query = text("""
+				SELECT name FROM \"workspace\" 
+				WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
+
+	time.sleep(0.5)
+
+	return render_template("chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
+			ws_id=ws_id, channel_id=channel_id, messages=messages, channel_name=channel_name, ws_name=ws_name)
+
+
+@app.route('/dm/<user_id>/<ws_id>/<dm_id>')
+def dm(user_id, ws_id, dm_id):
+	# query to get all workspaces that the user is a part of
+	select_query = text("""
+		SELECT ws_id, name FROM \"workspace\" 
+		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
+						WHERE user_id = :user_id)""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	workspaces = []
+	for result in cursor:
+		workspaces.append(result)
+	cursor.close()
+
+	# query to get all channels in the workspace
+	select_query = text("""
+			SELECT channel_id, name FROM \"channel\" 
+			WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	channels = []
+	for result in cursor:
+		channels.append(result)
+	cursor.close()
+
+	# query to get all the direct messages in the workspace
+	# only display dms that have messages sent --> no empty ones
+	select_query = text("""
+				SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
+	# query to get all messages in the dm
+	select_query = text("""
+		SELECT M.mess_id, M.content, U.name
+		FROM "user" U, message M, is_posted_in_dm P
+		WHERE P.ws_id = :ws_id 
+			AND P.dm_id = :dm_id 
+			AND M.mess_id = P.mess_id 
+			AND U.user_id = M.user_id;""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "dm_id": dm_id})
+	messages = []
+	for result in cursor:
+		messages.append(result)
+	cursor.close()
+
+	# query to get channel name
+	#select_query = text("""
+	#		SELECT name FROM \"channel\"
+	#		WHERE channel_id = :channel_id""")
+	#cursor = g.conn.execute(select_query, {"channel_id": channel_id})
+	#channel_name = cursor.fetchone()[0]
+	#cursor.close()
+
+	# query to dm name (name of other person in dm)
+	select_query = text("""
+				SELECT name FROM \"is_posted_in_dm\", \"user\"  
+				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dm_name = cursor.fetchone()[0]
+	cursor.close()
+
+	# query to get workspace name
+	select_query = text("""
+					SELECT name FROM \"workspace\" 
+					WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
+
+	time.sleep(0.5)
+
+	#removed channel_id=channel_id ???
+	# and channel_name=channel_name,
+	return render_template("dm_chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
+			ws_id=ws_id, dm_id=dm_id, messages=messages, ws_name=ws_name, dm_name=dm_name)
+
+
 # Example of adding new data to the database
 # @app.route('/add', methods=['POST'])
 # def add():
@@ -414,6 +519,23 @@ def addChannelButton():
 
 	return render_template("add_channel.html", ws_id=ws_id, user_id=user_id)
 
+@app.route('/addDMButton', methods=['POST'])
+def addDMButton():
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
+
+	#list through all people in the workspace
+
+	# Query the database to find the most recent ws_id
+	select_query = text("""SELECT user_id FROM \"join\"
+						WHERE ws_id = :ws_id""")
+	ws_users = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()
+
+	# 1 second delay to deal with concurrency issues
+	time.sleep(1)
+
+	return render_template("add_dm.html", ws_id=ws_id, user_id=user_id, ws_users=ws_users)
+
 #assumes we handle GET and POST when we don't explicitly define methods
 @app.route('/addWS', methods=['POST'])
 def addWS():
@@ -442,7 +564,7 @@ def addWS():
 	params["name"] = name
 	params["user_id"] = user_id
 	g.conn.execute(text('INSERT INTO "workspace"(ws_id, name, user_id) VALUES (:ws_id, :name, :user_id)'), params)
-
+	g.conn.commit()
 	#also need to have user join that workspace
 	g.conn.execute(text('INSERT INTO "join"(user_id,ws_id) VALUES (:user_id,:ws_id)'), params)
 

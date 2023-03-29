@@ -40,8 +40,6 @@
         </div>
         <div>
             <form method="POST" action="/addChannelButton">
-                <input type="hidden" name="ws_id" value="{{ ws_id }}">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">+ Add Channel</button>
             </form>
         </div>
@@ -63,11 +61,12 @@
                 <button type="submit">+ Add DM</button>
             </form>
         </div>
-
     </div>
+
+
     <div class="chat-container">
         <div class="chat-header">
-            <h4># {{ channel_name }}</h4>
+            <h4># {{ dm_name }}</h4>
         </div>
         <div class="chat-body" id="chatBody">
             {% for n in messages %}
@@ -82,11 +81,11 @@
             }
         </script>
         <div class="chat-footer">
-            <form method="POST" action="/sendMessage">
+            <form method="POST" action="/sendDM">
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
-                <input type="hidden" name="channel_id" value="{{ channel_id }}">
+                <input type="hidden" name="dm_id" value="{{ dm_id }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <textarea name="message" rows="4" cols="50" placeholder="Message #{{channel_name}}"></textarea>
+                <textarea name="message" rows="4" cols="50" placeholder="Message #{{ dm_name }}"></textarea>
                 <button type="submit">SEND</button>
             </form>
         </div>

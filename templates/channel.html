@@ -24,6 +24,9 @@
         </div>
     </div>
     <div class="channel-container">
+        <div class="channel-header">
+            <h4># {{ ws_name }}</h4>
+        </div>
         <h4>Channels</h4>
         <div>
             {% for n in channels %}
@@ -40,6 +43,7 @@
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">+ Add Channel</button>
+            </form>
         </div>
         <h4>Direct Messages</h4>
         <div>
@@ -55,6 +59,7 @@
         <div>
             <form method="POST" action="/addDMButton">
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">+ Add DM</button>
             </form>
         </div>
