@@ -365,8 +365,8 @@ def dm(user_id, ws_id, dm_id):
 	# query to dm name (name of other person in dm)
 	select_query = text("""
 				SELECT name FROM \"is_posted_in_dm\", \"user\"  
-				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
-	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+				WHERE ws_id = :ws_id AND user_id = sender_id AND recipient_id = :user_id  AND dm_id = :dm_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id, "dm_id": dm_id})
 	dm_name = cursor.fetchone()[0]
 	cursor.close()
 
@@ -526,15 +526,17 @@ def addDMButton():
 
 	#list through all people in the workspace
 
-	# Query the database to find the most recent ws_id
+	# Query the database to find all users.
+	# do NOT include current user bc we don't want them to do a DM with self
 	select_query = text("""SELECT J.user_id, name FROM \"join\" J, \"user\" U
-						WHERE ws_id = :ws_id AND J.user_id = U.user_id""")
-	ws_users = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()
+						WHERE ws_id = :ws_id AND J.user_id = U.user_id AND J.user_id != :user_id""")
+	ws_users = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id}).fetchall()
 
 	# 1 second delay to deal with concurrency issues
 	time.sleep(1)
 
 	return render_template("add_dm.html", ws_id=ws_id, user_id=user_id, ws_users=ws_users)
+
 
 #assumes we handle GET and POST when we don't explicitly define methods
 @app.route('/addWS', methods=['POST'])
@@ -620,9 +622,13 @@ def addChannel():
 @app.route('/addDM', methods=['POST'])
 def addDM():
 	# accessing form inputs from user
-	name = request.form['dm_name']
 	ws_id = request.form['ws_id']
 	user_id = request.form['user_id']
+	recipient_id = request.form['recipient_id']
+
+
+
+	#BELOW IS COPIED
 
 	# Query the database to find the most recent channel_id given a ws
 	select_query = text("""SELECT channel_id FROM "channel" WHERE ws_id = :ws_id""")
