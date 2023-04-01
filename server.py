@@ -102,6 +102,20 @@ def teardown_request(exception):
 # see for routing: https://flask.palletsprojects.com/en/1.1.x/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
+
+
+""" 
+***************************************************************************************************
+---------------------------------------------------------------------------------------------------
+PAGES
+FUNCTIONS
+GET REQUESTS
+START HERE
+---------------------------------------------------------------------------------------------------
+***************************************************************************************************
+"""
+
+
 @app.route('/')
 def index():
 	"""
@@ -164,19 +178,11 @@ def index():
 	#
 	return render_template("index.html")
 
-#
-# This is an example of a different path.  You can see it at:
-# 
-#     localhost:8111/another
-#
-# Notice that the function name is another() rather than index()
-# The functions for each app.route need to have different names
-#
 @app.route('/signup/<email>')
 def signup(email):
 	return render_template("signup.html", email=email)
 
-@app.route('/workspace/<user_id>')
+@app.route('/workspace/<user_id>/')
 def workspace(user_id):
 	# query to get all workspaces that the user is a part of
 	select_query = text("""
@@ -191,7 +197,7 @@ def workspace(user_id):
 	cursor.close()
 	return render_template("workspace.html", data=workspaces, user_id=user_id)
 
-@app.route('/channel/<user_id>/<ws_id>')
+@app.route('/channel/<user_id>/<ws_id>/')
 def channel(user_id, ws_id):
 	# query to get all workspaces that the user is a part of
 	select_query = text("""
@@ -222,14 +228,10 @@ def channel(user_id, ws_id):
 				((recipient_id = :user_id AND user_id = sender_id) OR
 				(sender_id = :user_id AND user_id = recipient_id))""")
 	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
-	print("user_id: ", user_id)
-	print("ws_id: ", ws_id)
 	dms = []
 	for result in cursor:
 		dms.append(result)
 	cursor.close()
-	print("dms: ")
-	print(dms)
 
 	#query to get workspace name
 	select_query = text("""
@@ -313,7 +315,6 @@ def chat(user_id, ws_id, channel_id):
 	return render_template("chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
 			ws_id=ws_id, channel_id=channel_id, messages=messages, channel_name=channel_name, ws_name=ws_name)
 
-
 @app.route('/dm/<user_id>/<ws_id>/<dm_id>')
 def dm(user_id, ws_id, dm_id):
 	# query to get all workspaces that the user is a part of
@@ -364,14 +365,6 @@ def dm(user_id, ws_id, dm_id):
 		messages.append(result)
 	cursor.close()
 
-	# query to get channel name
-	#select_query = text("""
-	#		SELECT name FROM \"channel\"
-	#		WHERE channel_id = :channel_id""")
-	#cursor = g.conn.execute(select_query, {"channel_id": channel_id})
-	#channel_name = cursor.fetchone()[0]
-	#cursor.close()
-
 	# query to dm name (name of other person in dm)
 	select_query = text("""
 				SELECT DISTINCT sender_id, name FROM \"is_posted_in_dm\", \"user\"  
@@ -401,46 +394,30 @@ def dm(user_id, ws_id, dm_id):
 
 	time.sleep(0.5)
 
-	#removed channel_id=channel_id ???
-	# and channel_name=channel_name,
 	return render_template("dm_chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
 			ws_id=ws_id, dm_id=dm_id, messages=messages, ws_name=ws_name, dm_name=dm_name, recipient_id=recipient_id)
 
+# return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
+@app.route('/dm_add_new/<user_id>/<ws_id>/<recipient_id>')
+def dm_add_new(user_id, ws_id, recipient_id):
+	return render_template("dm_add_new.html", user_id=user_id, ws_id=ws_id, recipient_id=recipient_id)
 
-# Example of adding new data to the database
-# @app.route('/add', methods=['POST'])
-# def add():
-# 	# accessing form inputs from user
-# 	name = request.form['name']
-	
-# 	# passing params in for each variable into query
-# 	params = {}
-# 	params["new_name"] = name
-# 	g.conn.execute(text('INSERT INTO test(name) VALUES (:new_name)'), params)
-# 	g.conn.commit()
-# 	return redirect('/')
+""" 
+***************************************************************************************************
+---------------------------------------------------------------------------------------------------
+ACTIONS
+FUNCTIONS
+POST REQUESTS
+START HERE
+---------------------------------------------------------------------------------------------------
+***************************************************************************************************
+"""
+
 
 @app.route('/next', methods=['POST'])
 def next():
 	# accessing form inputs from user
 	curr_email = request.form['email']
-
-	# checking if email already exists
-	# select_query = "SELECT email from \"user\""
-	# cursor = g.conn.execute(text(select_query))
-	# emails = []
-	# for result in cursor:
-	# 	emails.append(result[0])
-	# cursor.close()
-
-	# # if email already exists, redirect to user's workspace
-	# if email in emails:
-	# 	select_query = """SELECT user_id from \"user\"
-	# 					WHERE email = :email"""
-	# 	cursor = g.conn.execute(select_query, email)
-	# 	curr_user_id = [cursor.fetchone()[0]]
-	# 	cursor.close()
-	# 	return redirect(url_for('workspace', user_id = curr_user_id))
 	
 	# Query the database to find the user_id corresponding to the email
 	select_query = text("""SELECT user_id FROM "user" WHERE email = :email""")
@@ -451,13 +428,6 @@ def next():
     
 	user_id = result[0]
 	return redirect(url_for('workspace', user_id=user_id))
-
-	# if email does not exist, redirect to signup page
-	
-	# params = {}
-	# params["new_name"] = name
-	# g.conn.execute(text('INSERT INTO test(name) VALUES (:new_name)'), params)
-	# g.conn.commit()
 	
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -490,12 +460,10 @@ def submit():
 
 	return redirect(url_for('workspace', user_id=user_id))
 
-
-@app.route('/login')
-def login():
-	abort(401)
-	this_is_never_executed()
-
+# @app.route('/login')
+# def login():
+# 	abort(401)
+# 	this_is_never_executed()
 
 @app.route('/chooseWS', methods=['POST'])
 def chooseWS():
@@ -530,57 +498,6 @@ def addWSButton():
 
 	return render_template("add_workspace.html", user_id=user_id)
 
-
-@app.route('/addChannelButton', methods=['POST'])
-def addChannelButton():
-	ws_id = request.form['ws_id']
-	user_id = request.form['user_id']
-
-	# 1 second delay to deal with concurrency issues
-	time.sleep(1)
-
-	return render_template("add_channel.html", ws_id=ws_id, user_id=user_id)
-
-@app.route('/addDMButton', methods=['POST'])
-def addDMButton():
-	ws_id = request.form['ws_id']
-	user_id = request.form['user_id']
-
-	#list through all people in the workspace
-
-	# Query the database to find all users.
-	# do NOT include current user bc we don't want them to do a DM with self
-
-
-	#ALSOOOOOOOO fix so doesn't show users who already have a DM with
-
-	# Query the database to find all users in the workspace
-	select_query = text("""SELECT J.user_id, name FROM \"join\" J, \"user\" U
-						WHERE ws_id = :ws_id AND J.user_id = U.user_id AND J.user_id != :user_id""")
-	ws_users = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id}).fetchall()
-	print (ws_users)
-	# Query the database to find all existing DMs
-	select_query = text("""
-				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
-				WHERE ws_id = :ws_id AND 
-				((recipient_id = :user_id AND user_id = sender_id) OR
-				(sender_id = :user_id AND user_id = recipient_id))""")
-	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
-	dms = []
-	for result in cursor:
-		dms.append(result)
-	cursor.close()
-
-	names_to_exclude = {name for _, name in dms}
-	ws_users = [(id, name) for id, name in ws_users if name not in names_to_exclude]
-
-	# 1 second delay to deal with concurrency issues
-	time.sleep(1)
-
-	return render_template("add_dm.html", ws_id=ws_id, user_id=user_id, ws_users=ws_users)
-
-
-#assumes we handle GET and POST when we don't explicitly define methods
 @app.route('/addWS', methods=['POST'])
 def addWS():
 	# accessing form inputs from user
@@ -615,6 +532,16 @@ def addWS():
 	g.conn.commit()
 
 	return redirect(url_for('workspace', user_id=user_id))
+
+@app.route('/addChannelButton', methods=['POST'])
+def addChannelButton():
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
+
+	# 1 second delay to deal with concurrency issues
+	time.sleep(1)
+
+	return render_template("add_channel.html", ws_id=ws_id, user_id=user_id)
 
 @app.route('/addChannel', methods=['POST'])
 def addChannel():
@@ -660,23 +587,52 @@ def addChannel():
 	#redirect to channel
 	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
+@app.route('/addDMButton', methods=['POST'])
+def addDMButton():
+	ws_id = request.form['ws_id']
+	user_id = request.form['user_id']
+
+	# Query the database to find all users in the workspace
+	# do NOT include current user bc we don't want them to do a DM with self
+	select_query = text("""SELECT J.user_id, name FROM \"join\" J, \"user\" U
+						WHERE ws_id = :ws_id AND J.user_id = U.user_id AND J.user_id != :user_id""")
+	ws_users = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id}).fetchall()
+	
+	# Query the database to find all existing DMs
+	select_query = text("""
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
+	names_to_exclude = {name for _, name in dms}
+	ws_users = [(id, name) for id, name in ws_users if name not in names_to_exclude]
+
+	# 1 second delay to deal with concurrency issues
+	time.sleep(1)
+
+	return render_template("add_dm.html", ws_id=ws_id, user_id=user_id, ws_users=ws_users)
 
 @app.route('/addDM', methods=['POST'])
 def addDM():
 	# accessing form inputs from user
 	ws_id = request.form['ws_id']
 	user_id = request.form['user_id']
-	#recipient_id = request.form['recipient_id']
+	recipient_id = request.form['recipient_id']
 
 	# insert new DM into database
 	params = {}
 	params["ws_id"] = ws_id
 	params["user_id"] = user_id
-	#params["recipient_id"] = recipient_id
+	params["recipient_id"] = recipient_id
 	g.conn.execute(text('INSERT INTO "dm"(ws_id, user_id) VALUES (:ws_id, :user_id)'), params)
 
-	#return
-
+	return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
 
 @app.route('/sendMessage', methods=['POST'])
 def sendMessage():
@@ -705,7 +661,6 @@ def sendMessage():
 
 	return redirect(url_for('chat', user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
-
 @app.route('/sendDM', methods=['POST'])
 def sendDM():
 	#DOES NOT WORK YET
@@ -725,13 +680,6 @@ def sendDM():
 	select_query = text("""SELECT MAX(CAST(SUBSTRING(mess_id, 2) AS INTEGER)) FROM \"message\"""")
 	result = g.conn.execute(select_query).fetchone()
 	prev_message_id = result[0]
-
-	# Query the database to find the recipient_id
-	# select_query = text("""
-	# 			SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
-	# 			WHERE ws_id = :ws_id AND 
-	# 			recipient_id = :user_id AND 
-	# 			user_id = sender_id""")
 	
 	# insert new message into database
 	params = {}
@@ -751,6 +699,7 @@ def sendDM():
 	g.conn.commit()
 
 	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
+
 
 
 if __name__ == "__main__":
