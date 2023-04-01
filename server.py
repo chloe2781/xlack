@@ -217,13 +217,19 @@ def channel(user_id, ws_id):
 	# query to get all the direct messages in the workspace
 	# only display dms that have messages sent --> no empty ones
 	select_query = text("""
-			SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
-			WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
 	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	print("user_id: ", user_id)
+	print("ws_id: ", ws_id)
 	dms = []
 	for result in cursor:
 		dms.append(result)
 	cursor.close()
+	print("dms: ")
+	print(dms)
 
 	#query to get workspace name
 	select_query = text("""
@@ -262,8 +268,10 @@ def chat(user_id, ws_id, channel_id):
 	# query to get all the direct messages in the workspace
 	# only display dms that have messages sent --> no empty ones
 	select_query = text("""
-				SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
-				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
 	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
 	dms = []
 	for result in cursor:
@@ -332,8 +340,10 @@ def dm(user_id, ws_id, dm_id):
 	# query to get all the direct messages in the workspace
 	# only display dms that have messages sent --> no empty ones
 	select_query = text("""
-				SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
-				WHERE ws_id = :ws_id AND recipient_id = :user_id AND user_id = sender_id""")
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
 	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
 	dms = []
 	for result in cursor:
@@ -364,11 +374,22 @@ def dm(user_id, ws_id, dm_id):
 
 	# query to dm name (name of other person in dm)
 	select_query = text("""
-				SELECT name FROM \"is_posted_in_dm\", \"user\"  
-				WHERE ws_id = :ws_id AND user_id = sender_id AND recipient_id = :user_id  AND dm_id = :dm_id""")
+				SELECT DISTINCT sender_id, name FROM \"is_posted_in_dm\", \"user\"  
+				WHERE ws_id = :ws_id AND dm_id=:dm_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
 	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id, "dm_id": dm_id})
-	dm_name = cursor.fetchone()[0]
+	recipient_info = []
+	for result in cursor:
+		recipient_info.append(result)
 	cursor.close()
+
+	if recipient_info != []:
+		dm_name = recipient_info[0][1]
+		recipient_id = recipient_info[0][0]
+	else:
+		dm_name = ""
+		recipient_id = ""
 
 	# query to get workspace name
 	select_query = text("""
@@ -383,7 +404,7 @@ def dm(user_id, ws_id, dm_id):
 	#removed channel_id=channel_id ???
 	# and channel_name=channel_name,
 	return render_template("dm_chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
-			ws_id=ws_id, dm_id=dm_id, messages=messages, ws_name=ws_name, dm_name=dm_name)
+			ws_id=ws_id, dm_id=dm_id, messages=messages, ws_name=ws_name, dm_name=dm_name, recipient_id=recipient_id)
 
 
 # Example of adding new data to the database
@@ -533,9 +554,25 @@ def addDMButton():
 
 	#ALSOOOOOOOO fix so doesn't show users who already have a DM with
 
+	# Query the database to find all users in the workspace
 	select_query = text("""SELECT J.user_id, name FROM \"join\" J, \"user\" U
 						WHERE ws_id = :ws_id AND J.user_id = U.user_id AND J.user_id != :user_id""")
 	ws_users = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id}).fetchall()
+	print (ws_users)
+	# Query the database to find all existing DMs
+	select_query = text("""
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
+	names_to_exclude = {name for _, name in dms}
+	ws_users = [(id, name) for id, name in ws_users if name not in names_to_exclude]
 
 	# 1 second delay to deal with concurrency issues
 	time.sleep(1)
@@ -631,6 +668,13 @@ def addDM():
 	user_id = request.form['user_id']
 	#recipient_id = request.form['recipient_id']
 
+	# insert new DM into database
+	params = {}
+	params["ws_id"] = ws_id
+	params["user_id"] = user_id
+	#params["recipient_id"] = recipient_id
+	g.conn.execute(text('INSERT INTO "dm"(ws_id, user_id) VALUES (:ws_id, :user_id)'), params)
+
 	#return
 
 
@@ -670,6 +714,7 @@ def sendDM():
 	sender_id = request.form['user_id']
 	ws_id = request.form['ws_id']
 	dm_id = request.form['dm_id']
+	recipient_id = request.form['recipient_id']
 
 	#query to find recipient-id
 	select_query = text("""SELECT MAX(CAST(user_id AS INTEGER)) FROM \"user\"""")
@@ -681,24 +726,29 @@ def sendDM():
 	result = g.conn.execute(select_query).fetchone()
 	prev_message_id = result[0]
 
+	# Query the database to find the recipient_id
+	# select_query = text("""
+	# 			SELECT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+	# 			WHERE ws_id = :ws_id AND 
+	# 			recipient_id = :user_id AND 
+	# 			user_id = sender_id""")
+	
 	# insert new message into database
 	params = {}
 	params["mess_id"] = "m" + str(int(prev_message_id) + 1)
 	params["message"] = message
 	params["sender_id"] = sender_id
-	#params["recipient_id"] = recipient_id
+	params["recipient_id"] = recipient_id
 	params["dm_id"] = dm_id
 	params["ws_id"] = ws_id
 	g.conn.execute(text(
-		'INSERT INTO "message"(mess_id, post_date, content, user_id) VALUES (:mess_id,CURRENT_TIMESTAMP, :message, :user_id)'),
-				   params)
+		'INSERT INTO "message"(mess_id, post_date, content, user_id)\
+			  VALUES (:mess_id,CURRENT_TIMESTAMP, :message, :sender_id)'), params)
 	g.conn.execute(text(
 		'INSERT INTO "is_posted_in_dm"(mess_id, dm_id, ws_id, sender_id, recipient_id) VALUES (:mess_id,:dm_id, :ws_id, :sender_id, :recipient_id)'),
 				   params)
 
 	g.conn.commit()
-
-	print("HEREE")
 
 	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
 
