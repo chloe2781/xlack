@@ -23,11 +23,14 @@
             </form>
         </div>
     </div>
+    <div class="channel-header">
+        <h4>{{ ws_name }}</h4>
+    </div>
     <div class="channel-container">
-        <div class="channel-header">
-            <h4># {{ ws_name }}</h4>
+
+        <div>
+            <h4>Channels</h4>
         </div>
-        <h4>Channels</h4>
         <div>
             {% for n in channels %}
             <form method="POST" action="/chooseChannel">

@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
 </head>
 
-<body>
+<body onload="scrollToBottom()">
     <div class="ws-container">
         <div>
             {% for n in workspaces %}
@@ -23,10 +23,10 @@
             </form>
         </div>
     </div>
-    <div class="channel-header">
-        <h4>{{ ws_name }}</h4>
-    </div>
     <div class="channel-container">
+        <div class="channel-header">
+            <h4># {{ ws_name }}</h4>
+        </div>
         <h4>Channels</h4>
         <div>
             {% for n in channels %}
@@ -61,6 +61,34 @@
                 <input type="hidden" name="ws_id" value="{{ ws_id }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
                 <button type="submit">+ Add DM</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h4># {{ dm_name }}</h4>
+        </div>
+        <div class="chat-body" id="chatBody">
+            {% for n in messages %}
+            <div class="chat-username"><b>{{ n[2] }}</b></div>
+            <div class="chat-message">{{ n[1] }}</div>
+            {% endfor %}
+        </div>
+        <script>
+            function scrollToBottom() {
+                var chatBody = document.getElementById("chatBody");
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        </script>
+        <div class="chat-footer">
+            <form method="POST" action="/sendAndAddDM">
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <input type="hidden" name="recipient_id" value="{{ recipient_id }}">
+                <textarea name="message" rows="4" cols="50" placeholder="Message #{{ dm_name }}"></textarea>
+                <button type="submit">SEND</button>
             </form>
         </div>
     </div>

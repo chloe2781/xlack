@@ -7,22 +7,21 @@
 <body>
 
     <div class="login-container">
-        <h2>Create a DM</h2>
-        <h3>Click on the user you want to DM</h3>
+        <h2>Join an existing workspace!
+        </h2>
+        <h3>Click on the workspace you want to join</h3>
         <div>
-            {% for n in ws_users %}
-            <form method="POST" action="/addDM">
-                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+            {% for n in ws_list %}
+            <form method="POST" action="/joinWS">
+                <input type="hidden" name="ws_id" value="{{ n[0] }}">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <input type="hidden" name="recipient_id" value="{{ n[0] }}">
                 <button type="submit">{{ n[1] }}</button>
             </form>
             {% endfor %}
         </div>
     </div>
     <div class="go-back-container">
-        <form method="POST" action="/chooseWS">
-            <input type="hidden" name="workspace_id" value="{{ ws_id }}">
+        <form method="POST" action="/addWSButton">
             <input type="hidden" name="user_id" value="{{ user_id }}">
             <button type="submit">Go Back</button>
         </form>
