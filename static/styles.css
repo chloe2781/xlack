@@ -75,6 +75,9 @@ body {
     background-color: #AEAEAE;
     font-size: 20px;
     color: #000;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ws-container button:hover {
@@ -83,13 +86,14 @@ body {
 
 .channel-container {
     position: fixed;
-    top: 0;
+    bottom: 0;
+    top: 80px;
     left: 150px;
     height: 100%;
     width: 200px;
     background-color: #C3C3C3;
     z-index: 1;
-    padding-top: 20px;
+    /* padding-top: 80px; */
 }
 
 .channel-container button {
@@ -104,6 +108,10 @@ body {
     font-size: 16px;
     color: #000;
     text-align: left;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .channel-container button:hover {
@@ -117,6 +125,39 @@ body {
     margin-top: 30px;
     margin-left: 20px;
     margin-bottom: 23px;
+}
+
+.channel-header {
+    position: fixed;
+    top: 0;
+    height: 40px;
+    width: 160px;
+    left: 150px;
+    background-color: #AEAEAE;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+
+}
+
+.channel-header h4 {
+    font-size: calc(15px + 0.3vw);
+    font-family: arial;
+    color: #000000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
+.channel-header h4:not(:overflow) {
+    text-align: center;
+}
+
+.channel-header h4:overflow {
+    white-space: nowrap !important;
+    text-align: left;
 }
 
 .chat-container {

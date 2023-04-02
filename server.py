@@ -367,7 +367,7 @@ def dm(user_id, ws_id, dm_id):
 
 	# query to dm name (name of other person in dm)
 	select_query = text("""
-				SELECT DISTINCT sender_id, name FROM \"is_posted_in_dm\", \"user\"  
+				SELECT DISTINCT user_id, name FROM \"is_posted_in_dm\", \"user\"  
 				WHERE ws_id = :ws_id AND dm_id=:dm_id AND 
 				((recipient_id = :user_id AND user_id = sender_id) OR
 				(sender_id = :user_id AND user_id = recipient_id))""")
@@ -377,13 +377,12 @@ def dm(user_id, ws_id, dm_id):
 		recipient_info.append(result)
 	cursor.close()
 
-	if recipient_info != []:
-		dm_name = recipient_info[0][1]
-		recipient_id = recipient_info[0][0]
-	else:
-		dm_name = ""
-		recipient_id = ""
+	dm_name = recipient_info[0][1]
+	recipient_id = recipient_info[0][0]
 
+	print("dm_name: ", dm_name)
+	print("recipient_id: ", recipient_id)
+	
 	# query to get workspace name
 	select_query = text("""
 					SELECT name FROM \"workspace\" 
@@ -400,7 +399,58 @@ def dm(user_id, ws_id, dm_id):
 # return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
 @app.route('/dm_add_new/<user_id>/<ws_id>/<recipient_id>')
 def dm_add_new(user_id, ws_id, recipient_id):
-	return render_template("dm_add_new.html", user_id=user_id, ws_id=ws_id, recipient_id=recipient_id)
+	# query to get all workspaces that the user is a part of
+	select_query = text("""
+		SELECT ws_id, name FROM \"workspace\" 
+		WHERE ws_id IN (SELECT ws_id FROM \"join\" 
+						WHERE user_id = :user_id)""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	workspaces = []
+	for result in cursor:
+		workspaces.append(result)
+	cursor.close()
+
+	# query to get all channels in the workspace
+	select_query = text("""
+			SELECT channel_id, name FROM \"channel\" 
+			WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	channels = []
+	for result in cursor:
+		channels.append(result)
+	cursor.close()
+
+	# query to get all the direct messages in the workspace
+	# only display dms that have messages sent --> no empty ones
+	select_query = text("""
+				SELECT DISTINCT dm_id, name FROM \"is_posted_in_dm\", \"user\"
+				WHERE ws_id = :ws_id AND 
+				((recipient_id = :user_id AND user_id = sender_id) OR
+				(sender_id = :user_id AND user_id = recipient_id))""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "user_id": user_id})
+	dms = []
+	for result in cursor:
+		dms.append(result)
+	cursor.close()
+
+	# query to get recipient name
+	select_query = text("""
+				SELECT name FROM \"user\"
+				WHERE user_id = :recipient_id""")
+	cursor = g.conn.execute(select_query, {"recipient_id": recipient_id})
+	recipient_name = cursor.fetchone()[0]
+	cursor.close()
+
+	# query to get workspace name
+	select_query = text("""
+					SELECT name FROM \"workspace\" 
+					WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
+	return render_template("dm_add_new.html", workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
+			ws_id=ws_id, ws_name=ws_name, dm_name=recipient_name, recipient_id=recipient_id)
+
 
 """ 
 ***************************************************************************************************
@@ -459,11 +509,6 @@ def submit():
 	user_id = result[0]
 
 	return redirect(url_for('workspace', user_id=user_id))
-
-# @app.route('/login')
-# def login():
-# 	abort(401)
-# 	this_is_never_executed()
 
 @app.route('/chooseWS', methods=['POST'])
 def chooseWS():
@@ -626,13 +671,62 @@ def addDM():
 	recipient_id = request.form['recipient_id']
 
 	# insert new DM into database
-	params = {}
-	params["ws_id"] = ws_id
-	params["user_id"] = user_id
-	params["recipient_id"] = recipient_id
-	g.conn.execute(text('INSERT INTO "dm"(ws_id, user_id) VALUES (:ws_id, :user_id)'), params)
+	# params = {}
+	# params["ws_id"] = ws_id
+	# params["user_id"] = user_id
+	# params["recipient_id"] = recipient_id
+	# g.conn.execute(text('INSERT INTO "dm"(ws_id, user_id) VALUES (:ws_id, :user_id)'), params)
 
 	return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
+
+@app.route('/sendAndAddDM', methods=['POST'])
+def sendAndAddDM():
+	# accessing form inputs from user
+	message = request.form['message']
+	sender_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+	recipient_id = request.form['recipient_id']
+
+	# Query the database to find the most recent dm_id
+	select_query = text("""SELECT MAX(CAST(SUBSTRING(dm_id, 4) AS INTEGER)) FROM \"direct_message\"
+						WHERE ws_id = :ws_id""")
+	result = g.conn.execute(select_query, {"ws_id": ws_id}).fetchone()
+	prev_dm_id = result[0]
+	if prev_dm_id is None:
+		prev_dm_id = 0
+
+	# Query the database to find the most recent message_id
+	select_query = text("""SELECT MAX(CAST(SUBSTRING(mess_id, 2) AS INTEGER)) FROM \"message\"""")
+	result = g.conn.execute(select_query).fetchone()
+	prev_message_id = result[0]
+	
+	dm_id = "d" + ws_id[1:] + "-" + str(int(prev_dm_id) + 1)
+
+	# insert new message into database
+	params = {}
+	params["mess_id"] = "m" + str(int(prev_message_id) + 1)
+	params["message"] = message
+	params["sender_id"] = sender_id
+	params["recipient_id"] = recipient_id
+	params["dm_id"] = dm_id
+	params["ws_id"] = ws_id
+
+	print ("new dm_id: ")
+	print ("d" + ws_id[1:] + "-" + str(int(prev_dm_id) + 1))
+	
+	g.conn.execute(text(
+		'INSERT INTO "direct_message"(ws_id, dm_id)\
+			  VALUES (:ws_id, :dm_id)'), params)
+	g.conn.execute(text(
+		'INSERT INTO "message"(mess_id, post_date, content, user_id)\
+			  VALUES (:mess_id,CURRENT_TIMESTAMP, :message, :sender_id)'), params)
+	g.conn.execute(text(
+		'INSERT INTO "is_posted_in_dm"(mess_id, dm_id, ws_id, sender_id, recipient_id) VALUES (:mess_id,:dm_id, :ws_id, :sender_id, :recipient_id)'),
+				   params)
+
+	g.conn.commit()
+
+	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
 
 @app.route('/sendMessage', methods=['POST'])
 def sendMessage():
@@ -663,7 +757,6 @@ def sendMessage():
 
 @app.route('/sendDM', methods=['POST'])
 def sendDM():
-	#DOES NOT WORK YET
 	# accessing form inputs from user
 	message = request.form['message']
 	sender_id = request.form['user_id']
@@ -700,6 +793,44 @@ def sendDM():
 
 	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
 
+@app.route('/findWS', methods=['POST'])
+def findWS():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+
+	# Query the database to find the most recent message_id
+	select_query = text("""SELECT ws_id, name FROM \"workspace\"""")
+	cursor = g.conn.execute(select_query)
+	ws_list = []
+	for result in cursor:
+		ws_list.append(result)
+	cursor.close()
+
+	return render_template("find_workspace.html", ws_list=ws_list, user_id=user_id)
+
+@app.route('/joinWS', methods=['POST'])
+def joinWS():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+
+	# Query the database to find the most recent message_id
+	select_query = text("""SELECT name FROM \"workspace\" WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
+
+	# insert new message into database
+	params = {}
+	params["user_id"] = user_id
+	params["ws_id"] = ws_id
+	g.conn.execute(text(
+		'INSERT INTO "join"(user_id, ws_id)\
+			  VALUES (:user_id, :ws_id)'), params)
+
+	g.conn.commit()
+
+	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
 
 if __name__ == "__main__":
