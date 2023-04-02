@@ -22,7 +22,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #added to use sessions
 #app.secret_key = 'mysecretkey'
 
-
+"""
 # The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
 #
 # XXX: The URI should be in the format of: 
@@ -34,11 +34,11 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://zy2431:123123@34.73.36.248/project1"
 #
 # Modify these with your own credentials you received from TA!
+"""
 DATABASE_USERNAME = "cn2489"
 DATABASE_PASSWRD = "6642"
 DATABASE_HOST = "34.148.107.47" # change to 34.28.53.86 if you used database 2 for part 2
 DATABASEURI = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWRD}@{DATABASE_HOST}/project1"
-
 
 
 # This line creates a database engine that knows how to connect to the URI above.
@@ -126,7 +126,7 @@ def index():
 	request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
 
 	See its API: https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data
-	"""
+	
 
 	# DEBUG: this is debugging code to see what request looks like
 	print(request.args)
@@ -176,6 +176,7 @@ def index():
 	# render_template looks in the templates/ folder for files.
 	# for example, the below file reads template/index.html
 	#
+	"""
 	return render_template("index.html")
 
 @app.route('/signup/<email>')

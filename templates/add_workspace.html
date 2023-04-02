@@ -7,23 +7,35 @@
 
 <body>
 
-    <div class="login-container">
-        <h2>Create a workspace</h2>
-        <div>
-            <form method="POST" action="/addWS">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <input type="text" name="ws_name" placeholder="New workspace name:" required>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-        <p> or </p>
-        <div>
-            <form method="POST" action="/findWS">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit">Find workspace</button>
-            </form>
+    <div class="back-button">
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <div class="center-container">
+        <div class="login-container">
+            <h2>Create a workspace</h2>
+            <div>
+                <form method="POST" action="/addWS">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <input type="text" name="ws_name" placeholder="New workspace name:" required>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+            <p> or </p>
+            <div class="find-ws">
+                <form method="POST" action="/findWS">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit">Find workspace</button>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 
 </body>
 

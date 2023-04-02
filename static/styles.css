@@ -3,22 +3,50 @@ body {
     font-family: arial;
 }
 
+button {
+    border-radius: 10px;
+}
+
+input {
+    border-radius: 5px;
+}
+
+textarea {
+    border-radius: 5px;
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin: 30px;
+}
+
 .login-container {
     background-color: #EAEAEA;
     width: 480px;
-    height: 380px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
     margin: auto;
-    position: absolute;
+    /* position: absolute; */
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     text-align: center;
+    align-self: center;
+    padding: 30px;
+    border-radius: 15px;
 }
 
 .signup-container {
     @extend .login-container;
     height: 500px !important;
+    border-radius: 15px;
 }
 
 .login-container h2 {
@@ -53,7 +81,8 @@ body {
     height: 50px;
     border: none;
     background-color: #D9D9D9;
-    font-size: 25px;
+    font-size: 18px;
+
 }
 
 .ws-container {
@@ -64,13 +93,15 @@ body {
     width: 150px;
     background-color: #D9D9D9;
     z-index: 1;
+    overflow-y: scroll !important;
+    scroll-behavior: smooth !important;
 }
 
 .ws-container button {
     display: block;
     margin: 30px auto 0;
     width: 80%;
-    height: 50px;
+    height: 55px;
     border: none;
     background-color: #AEAEAE;
     font-size: 20px;
@@ -84,6 +115,14 @@ body {
     background-color: #C3C3C3;
 }
 
+.find-ws button {
+    margin-top: 0px;
+}
+
+.find-ws-list button {
+    width: 300px;
+}
+
 .channel-container {
     position: fixed;
     bottom: 0;
@@ -93,6 +132,8 @@ body {
     width: 200px;
     background-color: #C3C3C3;
     z-index: 1;
+    overflow-y: scroll !important;
+    scroll-behavior: smooth !important;
     /* padding-top: 80px; */
 }
 
@@ -244,5 +285,24 @@ body {
 }
 
 .chat-footer button:hover {
+    background-color: #AEAEAE;
+}
+
+.back-button button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 50px;
+    width: 80px;
+    background-color: #D9D9D9;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none !important;
+    font-size: 16px;
+}
+
+.back-button button:hover {
     background-color: #AEAEAE;
 }

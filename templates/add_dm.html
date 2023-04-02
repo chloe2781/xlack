@@ -6,6 +6,10 @@
 
 <body>
 
+    <div class="back-button">
+        <button onclick="goBack()">Back</button>
+    </div>
+
     <div class="login-container">
         <h2>Create a DM</h2>
         <h3>Click on the user you want to DM</h3>
@@ -20,13 +24,19 @@
             {% endfor %}
         </div>
     </div>
-    <div class="go-back-container">
+    <!-- <div class="go-back-container">
         <form method="POST" action="/chooseWS">
             <input type="hidden" name="workspace_id" value="{{ ws_id }}">
             <input type="hidden" name="user_id" value="{{ user_id }}">
             <button type="submit">Go Back</button>
         </form>
-    </div>
+    </div> -->
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 
 </body>
 
