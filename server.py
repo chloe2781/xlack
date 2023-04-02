@@ -380,9 +380,6 @@ def dm(user_id, ws_id, dm_id):
 
 	dm_name = recipient_info[0][1]
 	recipient_id = recipient_info[0][0]
-
-	print("dm_name: ", dm_name)
-	print("recipient_id: ", recipient_id)
 	
 	# query to get workspace name
 	select_query = text("""
@@ -711,9 +708,6 @@ def sendAndAddDM():
 	params["recipient_id"] = recipient_id
 	params["dm_id"] = dm_id
 	params["ws_id"] = ws_id
-
-	print ("new dm_id: ")
-	print ("d" + ws_id[1:] + "-" + str(int(prev_dm_id) + 1))
 	
 	g.conn.execute(text(
 		'INSERT INTO "direct_message"(ws_id, dm_id)\
@@ -832,6 +826,29 @@ def joinWS():
 	g.conn.commit()
 
 	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
+
+@app.route('/leaveWSButton', methods=['POST'])
+def leaveWSButton():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+
+	# Query the database to find the most recent message_id
+	select_query = text("""SELECT name FROM \"workspace\" WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	ws_name = cursor.fetchone()[0]
+	cursor.close()
+
+	# insert new message into database
+	params = {}
+	params["user_id"] = user_id
+	params["ws_id"] = ws_id
+	g.conn.execute(text(
+		'DELETE FROM "join" WHERE user_id = :user_id AND ws_id = :ws_id'), params)
+
+	g.conn.commit()
+
+	return redirect(url_for('workspace', user_id=user_id))
 
 
 if __name__ == "__main__":

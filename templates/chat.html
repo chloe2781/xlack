@@ -19,7 +19,7 @@
         <div>
             <form method="POST" action="/addWSButton">
                 <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit">+ Add Workspace</button>
+                <button type="submit">+</button>
             </form>
         </div>
     </div>
@@ -67,6 +67,15 @@
             </form>
         </div>
 
+    </div>
+    <div class="leave-button-container">
+        <div class="leave-button">
+            <form method="POST" action="/leaveWSButton">
+                <input type="hidden" name="ws_id" value="{{ ws_id }}">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit">Leave Workspace</button>
+            </form>
+        </div>
     </div>
     <div class="chat-container">
         <div class="chat-header">
