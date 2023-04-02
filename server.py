@@ -801,6 +801,19 @@ def findWS():
 		ws_list.append(result)
 	cursor.close()
 
+	# Query the database to find workspace that user is in
+	select_query = text("""SELECT ws_id, name FROM \"workspace\" WHERE ws_id IN 
+							(SELECT ws_id FROM \"join\" WHERE user_id = :user_id)""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	user_ws_list = []
+	for result in cursor:
+		user_ws_list.append(result)
+	cursor.close()
+
+	names_to_exclude = {name for _, name in user_ws_list}
+	ws_list = [(id, name) for id, name in ws_list if name not in names_to_exclude]
+	print(ws_list)
+
 	return render_template("find_workspace.html", ws_list=ws_list, user_id=user_id)
 
 @app.route('/joinWS', methods=['POST'])
