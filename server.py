@@ -483,7 +483,7 @@ START HERE
 """
 
 
-@app.route('/next', methods=['POST'])
+@app.route('/next/', methods=['POST'])
 def next():
 	# accessing form inputs from user
 	curr_email = request.form['email']
@@ -498,7 +498,7 @@ def next():
 	user_id = result[0]
 	return redirect(url_for('workspace', user_id=user_id))
 	
-@app.route('/submit', methods=['POST'])
+@app.route('/submit/', methods=['POST'])
 def submit():
 	# accessing form inputs from user
 	email = request.form['user_email']
@@ -540,14 +540,14 @@ def submit():
 
 	return redirect(url_for('workspace', user_id=user_id))
 
-@app.route('/chooseWS', methods=['POST'])
+@app.route('/chooseWS/', methods=['POST'])
 def chooseWS():
 	ws_id = request.form['workspace_id']
 	user_id = request.form['user_id']
 
 	return redirect(url_for('channel',user_id=user_id, ws_id=ws_id))
 
-@app.route('/chooseChannel', methods=['POST'])
+@app.route('/chooseChannel/', methods=['POST'])
 def chooseChannel():
 	channel_id = request.form['channel_id']
 	user_id = request.form['user_id']
@@ -555,7 +555,7 @@ def chooseChannel():
 
 	return redirect(url_for('chat',user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
-@app.route('/chooseDM', methods=['POST'])
+@app.route('/chooseDM/', methods=['POST'])
 def chooseDM():
 	dm_id = request.form['dm_id']
 	user_id = request.form['user_id']
@@ -564,7 +564,7 @@ def chooseDM():
 
 	return redirect(url_for('dm', user_id=user_id, ws_id=ws_id, dm_id=dm_id))
 
-@app.route('/addWSButton', methods=['POST'])
+@app.route('/addWSButton/', methods=['POST'])
 def addWSButton():
 	user_id = request.form['user_id']
 
@@ -573,7 +573,7 @@ def addWSButton():
 
 	return render_template("add_workspace.html", user_id=user_id)
 
-@app.route('/addWS', methods=['POST'])
+@app.route('/addWS/', methods=['POST'])
 def addWS():
 	# accessing form inputs from user
 	name = request.form['ws_name']
@@ -608,7 +608,7 @@ def addWS():
 
 	return redirect(url_for('workspace', user_id=user_id))
 
-@app.route('/addChannelButton', methods=['POST'])
+@app.route('/addChannelButton/', methods=['POST'])
 def addChannelButton():
 	ws_id = request.form['ws_id']
 	user_id = request.form['user_id']
@@ -618,7 +618,7 @@ def addChannelButton():
 
 	return render_template("add_channel.html", ws_id=ws_id, user_id=user_id)
 
-@app.route('/addChannel', methods=['POST'])
+@app.route('/addChannel/', methods=['POST'])
 def addChannel():
 	# accessing form inputs from user
 	name = request.form['channel_name']
@@ -674,7 +674,7 @@ def addChannel():
 	#redirect to channel
 	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
-@app.route('/addDMButton', methods=['POST'])
+@app.route('/addDMButton/', methods=['POST'])
 def addDMButton():
 	ws_id = request.form['ws_id']
 	user_id = request.form['user_id']
@@ -705,7 +705,7 @@ def addDMButton():
 
 	return render_template("add_dm.html", ws_id=ws_id, user_id=user_id, ws_users=ws_users)
 
-@app.route('/addDM', methods=['POST'])
+@app.route('/addDM/', methods=['POST'])
 def addDM():
 	# accessing form inputs from user
 	ws_id = request.form['ws_id']
@@ -721,7 +721,7 @@ def addDM():
 
 	return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
 
-@app.route('/sendAndAddDM', methods=['POST'])
+@app.route('/sendAndAddDM/', methods=['POST'])
 def sendAndAddDM():
 	# accessing form inputs from user
 	message = request.form['message']
@@ -767,7 +767,7 @@ def sendAndAddDM():
 
 	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
 
-@app.route('/sendMessage', methods=['POST'])
+@app.route('/sendMessage/', methods=['POST'])
 def sendMessage():
 	# accessing form inputs from user
 	message = request.form['message']
@@ -794,7 +794,7 @@ def sendMessage():
 
 	return redirect(url_for('chat', user_id=user_id, ws_id=ws_id, channel_id=channel_id))
 
-@app.route('/sendDM', methods=['POST'])
+@app.route('/sendDM/', methods=['POST'])
 def sendDM():
 	# accessing form inputs from user
 	message = request.form['message']
@@ -832,7 +832,7 @@ def sendDM():
 
 	return redirect(url_for('dm', user_id=sender_id, ws_id=ws_id, dm_id=dm_id))
 
-@app.route('/findWS', methods=['POST'])
+@app.route('/findWS/', methods=['POST'])
 def findWS():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -859,7 +859,7 @@ def findWS():
 
 	return render_template("find_workspace.html", ws_list=ws_list, user_id=user_id)
 
-@app.route('/joinWS', methods=['POST'])
+@app.route('/joinWS/', methods=['POST'])
 def joinWS():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -883,7 +883,7 @@ def joinWS():
 
 	return redirect(url_for('channel', user_id=user_id, ws_id=ws_id))
 
-@app.route('/leaveWSButton', methods=['POST'])
+@app.route('/leaveWSButton/', methods=['POST'])
 def leaveWSButton():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -906,7 +906,7 @@ def leaveWSButton():
 
 	return redirect(url_for('workspace', user_id=user_id))
 
-@app.route('/profileButton', methods=['POST'])
+@app.route('/profileButton/', methods=['POST'])
 def profileButton():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -927,7 +927,7 @@ def profileButton():
 
 	return render_template("profile.html", user_id=user_id, user_name=user_name, user_dob=user_dob, user_email=user_email)
 
-@app.route('/manageWS', methods=['POST'])
+@app.route('/manageWS/', methods=['POST'])
 def manageWS():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -949,7 +949,7 @@ def manageWS():
 	else:
 		return render_template("manage_ws.html", user_id=user_id, created_ws_list=created_ws_list)
 
-@app.route('/editChannel', methods=['POST'])
+@app.route('/editChannel/', methods=['POST'])
 def editChannel():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -970,7 +970,7 @@ def editChannel():
 
 	return render_template("edit_channel.html", user_id=user_id, ws_id=ws_id, channel_list=channel_list)
 
-@app.route('/deleteWS', methods=['POST'])
+@app.route('/deleteWS/', methods=['POST'])
 def deleteWS():
 	# accessing form inputs from user
 	user_id = request.form['user_id']
@@ -1018,7 +1018,7 @@ def deleteWS():
 	else:
 		return render_template("manage_ws.html", user_id=user_id, created_ws_list=created_ws_list)
 
-@app.route('/deleteChannel', methods=['POST'])
+@app.route('/deleteChannel/', methods=['POST'])
 def deleteChannel():
 	# accessing form inputs from user
 	user_id = request.form['user_id']

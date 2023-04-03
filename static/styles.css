@@ -17,6 +17,22 @@ textarea {
     border-radius: 5px;
 }
 
+/* Change the background color of the scrollbar */
+
+::-webkit-scrollbar {
+    width: 6px;
+    background-color: #D9D9D9;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #bdbec1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+    height: 30px;
+}
+
 .center-container {
     display: flex;
     /* flex-direction: column; */
@@ -120,6 +136,21 @@ textarea {
 
 .ws-container button:hover {
     background-color: #494F64;
+}
+
+.ws-container::-webkit-scrollbar {
+    background-color: #b2b4bd;
+}
+
+.ws-container::-webkit-scrollbar-thumb {
+    background-color: #9d9fa6;
+    border-radius: 30px;
+    opacity: 0.2;
+    height: 50px;
+}
+
+#active-button:active {
+    background-color: #494F64 !important;
 }
 
 .find-ws button {
