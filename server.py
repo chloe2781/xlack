@@ -530,11 +530,7 @@ def submit():
 	dob_min = date(1923, 1, 1)
 	dob_max = date(2014, 1, 1)
 
-	print(dob)
-	print(dob_max)
-
 	if dob < str(dob_min) or dob > str(dob_max):
-		print("invalid dob")
 		error_msg = 'Please enter a valid date of birth.'
 		return render_template('signup.html', email=email, error_msg=error_msg)
 
@@ -961,8 +957,6 @@ def manageWS():
 	for result in cursor:
 		created_ws_list.append(result)
 	cursor.close()
-
-	print(created_ws_list)
 
 	if created_ws_list == []:
 		return render_template("manage_ws_empty.html", user_id=user_id, created_ws_list=created_ws_list)

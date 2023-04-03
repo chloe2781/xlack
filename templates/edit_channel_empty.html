@@ -7,8 +7,15 @@
 
 <body>
 
-    <div class="back-button">
+    <!-- <div class="back-button">
         <button onclick="goBack()">Back</button>
+    </div> -->
+
+    <div class="back-button back-dashboard">
+        <form method="POST" action="/manageWS">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <button type="submit">Back to Manage Workspace</button>
+        </form>
     </div>
 
     <div class="center-container">
@@ -19,11 +26,11 @@
         </div>
     </div>
 
-    <script>
+    <!-- <script>
         function goBack() {
-            window.history.go(-2);
+            window.history.back();
         }
-    </script>
+    </script> -->
 </body>
 
 
