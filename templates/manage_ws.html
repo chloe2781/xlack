@@ -7,8 +7,11 @@
 
 <body>
 
-    <div class="back-button">
-        <button onclick="goBack()">Back</button>
+    <div class="back-button back-dashboard">
+        <form method="GET" action="/workspace/{{ user_id }}">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <button type="submit">Back to Dashboard</button>
+        </form>
     </div>
 
     <div class="center-container">

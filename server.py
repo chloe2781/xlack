@@ -601,9 +601,7 @@ def addChannel():
 		channel_list.append(row[0])
 	cursor.close()
 
-	print(channel_list)
 	if name in channel_list:
-		print("channel name already exists")
 		error_msg = '*The channel name is already taken. Please choose a different name.'
 		return render_template('add_channel.html', ws_id=ws_id, user_id=user_id, error_msg=error_msg)
 
@@ -826,7 +824,6 @@ def findWS():
 
 	names_to_exclude = {name for _, name in user_ws_list}
 	ws_list = [(id, name) for id, name in ws_list if name not in names_to_exclude]
-	print(ws_list)
 
 	return render_template("find_workspace.html", ws_list=ws_list, user_id=user_id)
 
@@ -895,10 +892,6 @@ def profileButton():
 	user_name = user_info[0][1]
 	user_dob = user_info[0][2].strftime('%m/%d/%Y')
 	user_email = user_info[0][3]
-
-	print(user_name)
-	print(user_dob)
-	print(user_email)
 
 	return render_template("profile.html", user_id=user_id, user_name=user_name, user_dob=user_dob, user_email=user_email)
 

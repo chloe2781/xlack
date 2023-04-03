@@ -441,3 +441,7 @@ textarea {
     justify-content: center;
     align-items: center;
 }
+
+.back-dashboard button {
+    width: 170px;
+}
