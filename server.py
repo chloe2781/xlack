@@ -375,7 +375,7 @@ def dm(user_id, ws_id, dm_id):
 
 	# query to get all messages in the dm
 	select_query = text("""
-		SELECT M.mess_id, M.content, U.name
+		SELECT M.mess_id, M.content, U.name, M.post_date
 		FROM "user" U, message M, is_posted_in_dm P
 		WHERE P.ws_id = :ws_id 
 			AND P.dm_id = :dm_id 
@@ -386,6 +386,26 @@ def dm(user_id, ws_id, dm_id):
 	for result in cursor:
 		messages.append(result)
 	cursor.close()
+
+	messages_with_timestamp = []
+	current_time = datetime.now()
+	current_time = pytz.utc.localize(current_time)
+	est_tz = pytz.timezone('US/Eastern')
+
+
+	for message in messages:
+		timestamp = message[3]
+		utc_timestamp = timestamp.replace(tzinfo=pytz.utc)
+
+		# convert timestamp to EST
+		est_timestamp = utc_timestamp.astimezone(est_tz)
+
+		timestamp_str = est_timestamp.strftime("%I:%M %p  %m/%d/%Y")
+		message_with_timestamp = list(message)
+		message_with_timestamp[3] = timestamp_str
+		messages_with_timestamp.append(message_with_timestamp)
+
+	messages = messages_with_timestamp
 
 	# query to dm name (name of other person in dm)
 	select_query = text("""
