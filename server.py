@@ -245,7 +245,7 @@ def channel(user_id, ws_id):
 	return render_template("channel.html", workspaces=workspaces, channels=channels, user_id=user_id, ws_id=ws_id,
 						   dms=dms, ws_name=ws_name)
 
-@app.route('/chat/<user_id>/<ws_id>/<channel_id>')
+@app.route('/chat/<user_id>/<ws_id>/<channel_id>/')
 def chat(user_id, ws_id, channel_id):
 	# query to get all workspaces that the user is a part of
 	select_query = text("""
@@ -316,7 +316,7 @@ def chat(user_id, ws_id, channel_id):
 	return render_template("chat.html",workspaces=workspaces, channels=channels, dms=dms, user_id=user_id,
 			ws_id=ws_id, channel_id=channel_id, messages=messages, channel_name=channel_name, ws_name=ws_name)
 
-@app.route('/dm/<user_id>/<ws_id>/<dm_id>')
+@app.route('/dm/<user_id>/<ws_id>/<dm_id>/')
 def dm(user_id, ws_id, dm_id):
 	# query to get all workspaces that the user is a part of
 	select_query = text("""
@@ -395,7 +395,7 @@ def dm(user_id, ws_id, dm_id):
 			ws_id=ws_id, dm_id=dm_id, messages=messages, ws_name=ws_name, dm_name=dm_name, recipient_id=recipient_id)
 
 # return redirect(url_for('dm_add_new', user_id=user_id, ws_id=ws_id, recipient_id=recipient_id))
-@app.route('/dm_add_new/<user_id>/<ws_id>/<recipient_id>')
+@app.route('/dm_add_new/<user_id>/<ws_id>/<recipient_id>/')
 def dm_add_new(user_id, ws_id, recipient_id):
 	# query to get all workspaces that the user is a part of
 	select_query = text("""
@@ -862,6 +862,168 @@ def leaveWSButton():
 	g.conn.commit()
 
 	return redirect(url_for('workspace', user_id=user_id))
+
+@app.route('/profileButton', methods=['POST'])
+def profileButton():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+
+	# query to get all information about the user
+	select_query = text("""
+			SELECT * FROM \"user\"
+			WHERE user_id = :user_id""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	user_info = []
+	for result in cursor:
+		user_info.append(result)
+	cursor.close()
+
+	user_name = user_info[0][1]
+	user_dob = user_info[0][2].strftime('%m/%d/%Y')
+	user_email = user_info[0][3]
+
+	print(user_name)
+	print(user_dob)
+	print(user_email)
+
+	return render_template("profile.html", user_id=user_id, user_name=user_name, user_dob=user_dob, user_email=user_email)
+
+@app.route('/manageWS', methods=['POST'])
+def manageWS():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+
+	# query to get all workspaces that the user created
+	select_query = text("""
+			SELECT ws_id, name FROM \"workspace\"
+			WHERE user_id = :user_id""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	created_ws_list = []
+	for result in cursor:
+		created_ws_list.append(result)
+	cursor.close()
+
+	print(created_ws_list)
+
+	if created_ws_list == []:
+		return render_template("manage_ws_empty.html", user_id=user_id, created_ws_list=created_ws_list)
+	else:
+		return render_template("manage_ws.html", user_id=user_id, created_ws_list=created_ws_list)
+
+@app.route('/editChannel', methods=['POST'])
+def editChannel():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+
+	# query to get all channels in the workspace
+	select_query = text("""
+			SELECT channel_id, name FROM \"channel\"
+			WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	channel_list = []
+	for result in cursor:
+		channel_list.append(result)
+	cursor.close()
+
+	if channel_list == []:
+		return render_template("edit_channel_empty.html", user_id=user_id, ws_id=ws_id, channel_list=channel_list)
+
+	return render_template("edit_channel.html", user_id=user_id, ws_id=ws_id, channel_list=channel_list)
+
+@app.route('/deleteWS', methods=['POST'])
+def deleteWS():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+
+	# query to get all messages in the workspace
+	select_query = text("""
+			SELECT mess_id FROM is_posted_in_channel WHERE ws_id = :ws_id
+			UNION
+			SELECT mess_id FROM is_posted_in_dm WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	mess_id_list = []
+	for result in cursor:
+		mess_id_list.append(result[0])
+	cursor.close()
+
+	# delete all the messages in the workspace
+	for mess_id in mess_id_list:
+		params = {}
+		params["mess_id"] = mess_id
+		g.conn.execute(text(
+			'DELETE FROM "message" WHERE mess_id = :mess_id'), params)
+
+	# delete all the workspace that the user created
+	params = {}
+	params["user_id"] = user_id
+	params["ws_id"] = ws_id
+	g.conn.execute(text(
+		'DELETE FROM "workspace" WHERE ws_id = :ws_id'), params)
+
+	g.conn.commit()
+
+	# query to get all workspaces that the user created
+	select_query = text("""
+			SELECT ws_id, name FROM \"workspace\"
+			WHERE user_id = :user_id""")
+	cursor = g.conn.execute(select_query, {"user_id": user_id})
+	created_ws_list = []
+	for result in cursor:
+		created_ws_list.append(result)
+	cursor.close()
+
+	if created_ws_list == []:
+		return render_template("manage_ws_empty.html", user_id=user_id, created_ws_list=created_ws_list)
+	else:
+		return render_template("manage_ws.html", user_id=user_id, created_ws_list=created_ws_list)
+
+@app.route('/deleteChannel', methods=['POST'])
+def deleteChannel():
+	# accessing form inputs from user
+	user_id = request.form['user_id']
+	ws_id = request.form['ws_id']
+	channel_id = request.form['channel_id']
+
+	# query to get all messages in the channel
+	select_query = text("""
+			SELECT mess_id FROM is_posted_in_channel WHERE ws_id = :ws_id AND channel_id = :channel_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id, "channel_id": channel_id})
+	mess_id_list = []
+	for result in cursor:
+		mess_id_list.append(result[0])
+	cursor.close()
+
+	# delete all the messages in the channel
+	for mess_id in mess_id_list:
+		params = {}
+		params["mess_id"] = mess_id
+		g.conn.execute(text(
+			'DELETE FROM "message" WHERE mess_id = :mess_id'), params)
+
+	# delete the channel that the user chose
+	params = {}
+	params["ws_id"] = ws_id
+	params["channel_id"] = channel_id
+	g.conn.execute(text(
+		'DELETE FROM "channel" WHERE ws_id = :ws_id AND channel_id = :channel_id'), params)
+	
+	g.conn.commit()
+
+	# query to get all channels in the workspace
+	select_query = text("""
+			SELECT channel_id, name FROM \"channel\"
+			WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	channel_list = []
+	for result in cursor:
+		channel_list.append(result)
+	cursor.close()
+
+	if channel_list == []:
+		return render_template("edit_channel_empty.html", user_id=user_id, ws_id=ws_id, channel_list=channel_list)
+	return render_template("edit_channel.html", user_id=user_id, ws_id=ws_id, channel_list=channel_list)
 
 
 if __name__ == "__main__":

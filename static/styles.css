@@ -5,6 +5,7 @@ body {
 
 button {
     border-radius: 10px;
+    cursor: pointer;
 }
 
 input {
@@ -17,12 +18,14 @@ textarea {
 
 .center-container {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     height: 100%;
     width: 100%;
     justify-content: center;
     align-items: center;
     margin: 30px;
+    margin-bottom: 100;
+    /* overflow-y: scroll !important; */
 }
 
 .login-container {
@@ -332,4 +335,92 @@ textarea {
 
 .back-button button:hover {
     background-color: #AEAEAE;
+}
+
+.profile-container {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    height: 50px;
+    width: 80px;
+    background-color: transparent;
+    z-index: 3;
+}
+
+.profile-button button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 50px;
+    width: 80px;
+    background-color: #555555;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none !important;
+    font-size: 16px;
+    color: #FFFFFF;
+}
+
+.profile-display h2 {
+    margin-bottom: 0px !important;
+}
+
+.profile-display p {
+    margin-bottom: 0px !important;
+}
+
+.profile-display button {
+    margin-top: 70px !important;
+    width: 180px;
+    height: 60px;
+}
+
+.manage-ws-title h2 {
+    margin-bottom: 10px;
+}
+
+.manage-ws-name {
+    margin-top: 0px !important;
+}
+
+.manage-ws-name h3 {
+    /* font-size: 18px; */
+    font-family: arial;
+    color: #000000;
+    float: center;
+    margin-top: 35px;
+    margin-bottom: -15px;
+}
+
+.manage-ws {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0px !important;
+}
+
+.manage-ws-button {
+    margin-right: 20px;
+    /* padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #7c7c7c;
+    color: #fff;
+    font-size: 16px;
+    border: none; */
+}
+
+.manage-ws button {
+    /* margin-right: 20px; */
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: #7c7c7c;
+    color: #fff;
+    font-size: 16px;
+    border: none;
+}
+
+.manage-ws-delete button {
+    background-color: #864848;
 }
