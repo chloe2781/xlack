@@ -1,0 +1,37 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="back-button">
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <div class="center-container">
+        <div class="login-container profile-display">
+            <h2>{{ user_name }}</h2>
+            <p>{{ user_dob }}</p>
+            <p>{{ user_email }}</p>
+            <div>
+                <form method="POST" action="/manageWS">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit">Manage Your Workspaces</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+</body>
+
+
+</html>

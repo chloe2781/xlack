@@ -1,0 +1,30 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="back-button">
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <div class="center-container">
+        <div class="login-container">
+            <div>
+                <p> There is no channel in this workspace! </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+
+
+</html>

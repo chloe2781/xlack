@@ -1,0 +1,49 @@
+<html>
+
+
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}" type="text/css">
+</head>
+
+<body>
+
+    <div class="back-button">
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <div class="center-container">
+        <div class="login-container manage-ws-title">
+            <h2>Workspaces</h2>
+            {% for n in created_ws_list %}
+            <div class="manage-ws-name">
+                <h3>{{ n[1] }} </h3>
+            </div>
+            <div class="manage-ws">
+                <div class="manage-ws-button">
+                    <form method="POST" action="/editChannel">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <input type="hidden" name="ws_id" value="{{ n[0] }}">
+                        <button type="submit">Edit Channels</button>
+                    </form>
+                </div>
+                <div class="manage-ws-delete">
+                    <form method="POST" action="/deleteWS">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <input type="hidden" name="ws_id" value="{{ n[0] }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+
+
+</html>
