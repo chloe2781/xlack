@@ -593,6 +593,20 @@ def addChannel():
 	ws_id = request.form['ws_id']
 	user_id = request.form['user_id']
 
+	# check if channel name already exists in workspace
+	select_query = text("""SELECT name FROM \"channel\" WHERE ws_id = :ws_id""")
+	cursor = g.conn.execute(select_query, {"ws_id": ws_id})
+	channel_list = []
+	for row in cursor:
+		channel_list.append(row[0])
+	cursor.close()
+
+	print(channel_list)
+	if name in channel_list:
+		print("channel name already exists")
+		error_msg = '*The channel name is already taken. Please choose a different name.'
+		return render_template('add_channel.html', ws_id=ws_id, user_id=user_id, error_msg=error_msg)
+
 	# Query the database to find the most recent channel_id given a ws
 	select_query = text("""SELECT channel_id FROM "channel" WHERE ws_id = :ws_id""")
 	id_list = g.conn.execute(select_query, {"ws_id": ws_id}).fetchall()

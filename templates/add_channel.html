@@ -18,7 +18,7 @@
         <button onclick="goBack()">Back</button>
     </div>
 
-    <div class="center-container">
+    <div class="center-container error-column">
         <div class="login-container">
             <h2>Create a channel</h2>
             <div>
@@ -29,8 +29,16 @@
                     <button type="submit">Submit</button>
                 </form>
             </div>
+            <div class="error-container">
+                {% if error_msg %}
+                <p class="error">{{ error_msg }}</p>
+                {% endif %}
+            </div>
         </div>
+
+
     </div>
+
 
     <script>
         function goBack() {

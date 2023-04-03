@@ -424,3 +424,20 @@ textarea {
 .manage-ws-delete button {
     background-color: #864848;
 }
+
+.error-container {
+    margin-top: 0px;
+}
+
+.error {
+    text-align: center;
+    color: rgb(139, 18, 18);
+    font-size: 14px;
+}
+
+.error-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
