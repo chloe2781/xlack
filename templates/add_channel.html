@@ -26,7 +26,7 @@
                     <input type="hidden" name="ws_id" value="{{ ws_id }}">
                     <input type="hidden" name="user_id" value="{{ user_id }}">
                     <input type="text" name="channel_name" placeholder="New channel name:" required>
-                    <button type="submit">Submit</button>
+                    <button type="submit">CREATE</button>
                 </form>
             </div>
             <div class="error-container">
@@ -42,7 +42,7 @@
 
     <script>
         function goBack() {
-            window.history.back();
+            window.history.go(-2);
         }
     </script>
 

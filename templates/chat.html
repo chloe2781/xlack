@@ -83,7 +83,8 @@
         </div>
         <div class="chat-body" id="chatBody">
             {% for n in messages %}
-            <div class="chat-username"><b>{{ n[2] }}</b></div>
+            <span class="chat-username"><b>{{ n[2] }}</b></span>
+            <span class="chat-timestamp">{{ n[3] }}</span>
             <div class="chat-message">{{ n[1] }}</div>
             {% endfor %}
         </div>

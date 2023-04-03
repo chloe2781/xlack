@@ -14,7 +14,8 @@ import time
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, url_for
-from datetime import datetime
+from datetime import datetime, date
+import pytz
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -283,7 +284,7 @@ def chat(user_id, ws_id, channel_id):
 
 	# query to get all messages in the channel
 	select_query = text("""
-		SELECT M.mess_id, M.content, U.name
+		SELECT M.mess_id, M.content, U.name, M.post_date
 		FROM "user" U, message M, is_posted_in_channel P
 		WHERE P.ws_id = :ws_id 
 			AND P.channel_id = :channel_id 
@@ -294,6 +295,26 @@ def chat(user_id, ws_id, channel_id):
 	for result in cursor:
 		messages.append(result)
 	cursor.close()
+
+	messages_with_timestamp = []
+	current_time = datetime.now()
+	current_time = pytz.utc.localize(current_time)
+	est_tz = pytz.timezone('US/Eastern')
+
+
+	for message in messages:
+		timestamp = message[3]
+		utc_timestamp = timestamp.replace(tzinfo=pytz.utc)
+
+		# convert timestamp to EST
+		est_timestamp = utc_timestamp.astimezone(est_tz)
+
+		timestamp_str = est_timestamp.strftime("%I:%M %p  %m/%d/%Y")
+		message_with_timestamp = list(message)
+		message_with_timestamp[3] = timestamp_str
+		messages_with_timestamp.append(message_with_timestamp)
+
+	messages = messages_with_timestamp
 
 	# query to get channel name
 	select_query = text("""
@@ -485,6 +506,17 @@ def submit():
 	dob_str = request.form['dob']
 	dob = datetime.strptime(dob_str, '%Y-%m-%d')
 	dob = str(dob.date())
+
+	dob_min = date(1923, 1, 1)
+	dob_max = date(2014, 1, 1)
+
+	print(dob)
+	print(dob_max)
+
+	if dob < str(dob_min) or dob > str(dob_max):
+		print("invalid dob")
+		error_msg = 'Please enter a valid date of birth.'
+		return render_template('signup.html', email=email, error_msg=error_msg)
 
 	# Query the database to find the most recent user_id
 	select_query = text("""SELECT MAX(CAST(user_id AS INTEGER)) FROM \"user\"""")

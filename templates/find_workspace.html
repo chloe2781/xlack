@@ -16,19 +16,20 @@
     <div class="back-button">
         <button onclick="goBack()"> Back</button>
     </div>
-
-    <div class="login-container">
-        <h2>Join an existing workspace!
-        </h2>
-        <h3>Click on the workspace you want to join</h3>
-        <div class="find-ws-list">
-            {% for n in ws_list %}
-            <form method="POST" action="/joinWS">
-                <input type="hidden" name="ws_id" value="{{ n[0] }}">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit">{{ n[1] }}</button>
-            </form>
-            {% endfor %}
+    <div class="center-container">
+        <div class="login-container">
+            <h2>Join an existing workspace!
+            </h2>
+            <h3>Click on the workspace you want to join</h3>
+            <div class="find-ws-list">
+                {% for n in ws_list %}
+                <form method="POST" action="/joinWS">
+                    <input type="hidden" name="ws_id" value="{{ n[0] }}">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit">{{ n[1] }}</button>
+                </form>
+                {% endfor %}
+            </div>
         </div>
     </div>
 

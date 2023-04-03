@@ -1,15 +1,16 @@
 body {
     font-size: 15pt;
     font-family: arial;
+    background-color: #ECE9E6;
 }
 
 button {
-    border-radius: 10px;
+    border-radius: 15px;
     cursor: pointer;
 }
 
 input {
-    border-radius: 5px;
+    border-radius: 20px;
 }
 
 textarea {
@@ -29,7 +30,7 @@ textarea {
 }
 
 .login-container {
-    background-color: #EAEAEA;
+    background-color: #D9D9D9;
     width: 480px;
     display: flex;
     flex-direction: column;
@@ -71,7 +72,7 @@ textarea {
     width: 348px;
     height: 47px;
     border: none;
-    background-color: #D9D9D9;
+    background-color: #FCF9F6;
     padding-left: 15px;
     margin-bottom: 20px;
 }
@@ -79,11 +80,14 @@ textarea {
 .login-container button {
     display: block;
     margin: 30px auto 0;
-    width: 150px;
+    width: 160px;
     height: 50px;
     border: none;
-    background-color: #D9D9D9;
+    background-color: #838CA1;
     font-size: 18px;
+    color: #FFF;
+    text-transform: uppercase;
+    font-weight: bold;
 
 }
 
@@ -93,7 +97,8 @@ textarea {
     left: 0;
     height: 100%;
     width: 150px;
-    background-color: #D9D9D9;
+    background-color: #b2b4bd;
+    /* background: #D9D9D9; */
     z-index: 1;
     overflow-y: scroll !important;
     scroll-behavior: auto !important;
@@ -105,20 +110,22 @@ textarea {
     width: 80%;
     height: 55px;
     border: none;
-    background-color: #AEAEAE;
+    background-color: #747887;
     font-size: 20px;
-    color: #000;
+    color: #FFF;
     max-width: 80%;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .ws-container button:hover {
-    background-color: #C3C3C3;
+    background-color: #494F64;
 }
 
 .find-ws button {
     margin-top: 0px;
+    height: 70px;
+    background-color: #747887;
 }
 
 .find-ws-list button {
@@ -132,7 +139,7 @@ textarea {
     left: 150px;
     height: 80%;
     width: 200px;
-    background-color: #C3C3C3;
+    background-color: #D9D9D9;
     z-index: 1;
     overflow-y: scroll !important;
     scroll-behavior: smooth !important;
@@ -148,7 +155,7 @@ textarea {
     width: 80%;
     height: 30px;
     border: none;
-    background-color: #C3C3C3;
+    background-color: transparent;
     font-size: 16px;
     color: #000;
     text-align: left;
@@ -159,7 +166,7 @@ textarea {
 }
 
 .channel-container button:hover {
-    background-color: #AEAEAE;
+    background-color: #bac2d7;
 }
 
 .channel-container h4 {
@@ -177,7 +184,7 @@ textarea {
     height: 40px;
     width: 160px;
     left: 150px;
-    background-color: #AEAEAE;
+    background-color: #c4c5ca;
     z-index: 2;
     display: flex;
     justify-content: center;
@@ -210,7 +217,7 @@ textarea {
     left: 150px;
     height: 70px;
     width: 200px;
-    background-color: #C3C3C3;
+    background-color: #D9D9D9;
     z-index: 2;
     /* margin: 20px; */
 }
@@ -218,17 +225,19 @@ textarea {
 .leave-button button {
     position: absolute;
     bottom: 10px;
-    left: 20px;
+    left: 15px;
     height: 50px;
-    width: 160px;
-    background-color: #919191;
+    width: 170px;
+    background-color: #E0A6AA;
     color: #FFFFFF;
     z-index: 3;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none !important;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .chat-container {
@@ -237,7 +246,7 @@ textarea {
     left: 350px;
     height: 100%;
     width: 100%;
-    background-color: #FFFFFF;
+    background-color: #ECE9E6;
     z-index: 1;
 }
 
@@ -258,13 +267,23 @@ textarea {
     left: 350px;
     height: 68%;
     width: 100%;
-    background-color: #FFFFFF;
+    background-color: #ECE9E6;
     z-index: 1;
     overflow-y: scroll !important;
     padding: 30px;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     scroll-behavior: auto !important;
+}
+
+.chat-timestamp {
+    font-size: 12px;
+    font-family: arial;
+    color: #7c7c7c;
+    margin-left: 10px;
+    /* float: left; */
+    /* margin-top: 10px;
+    margin-bottom: 10px; */
 }
 
 .chat-username .chat-message {
@@ -285,7 +304,7 @@ textarea {
     left: 350px;
     height: 15%;
     width: 74%;
-    background-color: #FFFFFF;
+    background-color: #ECE9E6;
     z-index: 1;
     margin: 20px;
 }
@@ -306,16 +325,17 @@ textarea {
     width: 100px;
     height: 40px;
     border: none;
-    background-color: #919191;
+    background-color: #747887;
     font-size: 20px;
     color: #FFFFFF;
     margin: 20px;
     margin-top: auto;
     margin-bottom: auto;
+    font-weight: bold;
 }
 
 .chat-footer button:hover {
-    background-color: #AEAEAE;
+    background-color: #494F64;
 }
 
 .back-button button {
@@ -324,17 +344,20 @@ textarea {
     left: 20px;
     height: 50px;
     width: 80px;
-    background-color: #D9D9D9;
+    background-color: #E0A6AA;
+    color: #FFFFFF;
     z-index: 3;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none !important;
     font-size: 16px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
 .back-button button:hover {
-    background-color: #AEAEAE;
+    background-color: #c78f93;
 }
 
 .profile-container {
@@ -352,8 +375,8 @@ textarea {
     top: 10px;
     right: 10px;
     height: 50px;
-    width: 80px;
-    background-color: #555555;
+    width: 100px;
+    background-color: #E0A6AA;
     z-index: 3;
     display: flex;
     justify-content: center;
@@ -361,6 +384,8 @@ textarea {
     border: none !important;
     font-size: 16px;
     color: #FFFFFF;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .profile-display h2 {
@@ -415,7 +440,7 @@ textarea {
     /* margin-right: 20px; */
     padding: 10px 20px;
     border-radius: 10px;
-    background-color: #7c7c7c;
+    background-color: #838CA1;
     color: #fff;
     font-size: 16px;
     border: none;
@@ -423,6 +448,7 @@ textarea {
 
 .manage-ws-delete button {
     background-color: #864848;
+    text-transform: uppercase;
 }
 
 .error-container {
@@ -444,4 +470,15 @@ textarea {
 
 .back-dashboard button {
     width: 170px;
+}
+
+.log-out {
+    margin-top: -40px;
+}
+
+.log-out button {
+    width: 120px;
+    background-color: #555555;
+    color: #FFFFFF;
+    text-transform: uppercase;
 }
